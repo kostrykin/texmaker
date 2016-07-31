@@ -1,0 +1,7 @@
+*.swp
+Makefile
+/qrc_*.cpp
+/texmaker
+/.moc
+/.obj
+/.ui

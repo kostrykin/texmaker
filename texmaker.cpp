@@ -4272,6 +4272,7 @@ showRacine=config->value( "Show/Racine",true).toBool();
 
 extra_path=config->value("Tools/ExtraPath","").toString();
 useoutputdir=config->value( "Tools/OutputDir",false).toBool();
+outputsubdir=config->value( "Tools/OutputDirName","build").toString();
 clean_exit=config->value( "Tools/CleanWhenExit",false).toBool();
 quickmode=config->value( "Tools/Quick Mode",3).toInt();
 QString baseName = qApp->style()->objectName();
@@ -4834,6 +4835,7 @@ config.setValue( "Show/Racine",showRacine);
 
 config.setValue("Tools/ExtraPath",extra_path);
 config.setValue("Tools/OutputDir",useoutputdir);
+config.setValue("Tools/OutputDirName",outputsubdir);
 config.setValue("Tools/CleanWhenExit",clean_exit);
 
 config.setValue("Tools/Quick Mode",quickmode);
@@ -7687,7 +7689,7 @@ if (!currentfileSaved())
 // QString realname;
 if ((comd.startsWith("latex") || comd.startsWith("pdflatex")) &&  useoutputdir)
   {
-  commandline.replace("latex","latex --output-directory=build");
+  commandline.replace("latex", QString("latex --output-directory=") + outputsubdir);
   createBuildSubdirectory(finame);
 //  realname=finame;
   }
@@ -8523,7 +8525,7 @@ QStringList extension=QString(".log,.aux,.dvi,.lof,.lot,.bit,.idx,.glo,.bbl,.ilg
 if (useoutputdir)
 {
 QFileInfo fi(outputName(finame,".pdf"));
-  if(QMessageBox::warning(this, "Texmaker", tr("Make a copy of the %1.pdf/ps document in the \"build\" subdirectory and delete all the others %1.* files?").arg(fi.baseName()),tr("Ok"), tr("Cancel") )==0)
+  if(QMessageBox::warning(this, "Texmaker", tr("Make a copy of the %1.pdf/ps document in the build-directory and delete all the others %1.* files?").arg(fi.baseName()),tr("Ok"), tr("Cancel") )==0)
   {
   QDirIterator iterator(QDir(fi.absolutePath()),QDirIterator::NoIteratorFlags);
   while(iterator.hasNext())
@@ -9811,6 +9813,7 @@ confDlg->ui.lineEditLatexmk->setText(latexmk_command);
 confDlg->ui.lineEditSweave->setText(sweave_command);
 if (singleviewerinstance) confDlg->ui.checkBoxSingleInstanceViewer->setChecked(true);
 confDlg->ui.checkBoxTempBuild->setChecked(useoutputdir);
+confDlg->ui.lineEditTempBuildName->setText(outputsubdir);
 confDlg->ui.checkBoxClean->setChecked(clean_exit);
 
 confDlg->ui.comboBoxFont->lineEdit()->setText(EditorFont.family() );
@@ -10027,6 +10030,7 @@ if (confDlg->exec())
 	  }
 	singleviewerinstance=confDlg->ui.checkBoxSingleInstanceViewer->isChecked();
 	useoutputdir=confDlg->ui.checkBoxTempBuild->isChecked();
+	outputsubdir=confDlg->ui.lineEditTempBuildName->text();
 	clean_exit=confDlg->ui.checkBoxClean->isChecked();
 	
 	if ((pdfviewerWidget) && keyToggleFocus!="none") pdfviewerWidget->setKeyEditorFocus(QKeySequence(keyToggleFocus));
@@ -11696,9 +11700,9 @@ if (fn.isEmpty() || fn.startsWith("untitled")) return;
 QFileInfo fi(fn);
 if (!fi.exists()) return;
 QDir basedir(fi.absolutePath());
-QDir outputdir(fi.absolutePath()+"/build");
+QDir outputdir(fi.absolutePath()+"/"+outputsubdir);
 if (outputdir.exists()) return;
-basedir.mkdir("build");
+basedir.mkdir(outputsubdir);
 }
 
 QString Texmaker::outputName(QString finame,QString extension)
@@ -11712,7 +11716,7 @@ QString name="";
 QFileInfo fi(finame);
 QString path=fi.absolutePath();
 QString fn=fi.fileName();
-if (useoutputdir) name=path+"/build/"+fn;
+if (useoutputdir) name=path+"/"+outputsubdir+"/"+fn;
 else name=fi.absoluteFilePath();
 QString ext=fi.suffix();
 QString basename=name.left(name.length()-ext.length()-1);

@@ -161,7 +161,7 @@ QString sessionTempFile;
 
 //settings
 bool eraseSettings, replaceSettings;
-QString settingsFileName;
+QString settingsFileName, outputsubdir;
 int split1_right, split1_left, split2_top, split2_bottom, quickmode, tabwidth;
 bool singlemode, wordwrap, parenmatch, showline, showoutputview, showstructview, showpdfview, showsourceview, showfilesview, ams_packages, makeidx_package, completion, inlinespellcheck, modern_style, new_gui, builtinpdfview, singleviewerinstance, babel_package, geometry_package, graphicx_package, watchfiles, autosave, tabspaces, useoutputdir ;
 bool lmodern_package, kpfonts_package, fourier_package;
