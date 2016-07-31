@@ -1055,6 +1055,36 @@
             </property>
            </widget>
           </item>
+          <item row="9" column="0">
+           <widget class="Line" name="line_131">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QLabel" name="label_91">
+            <property name="text">
+             <string>When Quick Build finishes successfully, run the following script: (%: source filename, leave empty to disable)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11">
+           <layout class="QHBoxLayout" name="horizontalLayout_31">
+            <item><widget class="QLineEdit" name="lineEditPostQuickBuild"/></item>
+            <item>
+             <widget class="QPushButton" name="pushButtonPostQuickBuild">
+              <property name="text">
+               <string>browse</string>
+              </property>
+              <property name="icon">
+               <iconset resource="texmaker.qrc">
+                <normaloff>:/images/fileopen16.png</normaloff>:/images/fileopen16.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
          </layout>
         </widget>
        </item>

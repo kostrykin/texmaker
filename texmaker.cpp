@@ -4273,6 +4273,7 @@ showRacine=config->value( "Show/Racine",true).toBool();
 extra_path=config->value("Tools/ExtraPath","").toString();
 useoutputdir=config->value( "Tools/OutputDir",false).toBool();
 outputsubdir=config->value( "Tools/OutputDirName","build").toString();
+postquickbuild=config->value( "Tools/PostQuickBuild","").toString();
 clean_exit=config->value( "Tools/CleanWhenExit",false).toBool();
 quickmode=config->value( "Tools/Quick Mode",3).toInt();
 QString baseName = qApp->style()->objectName();
@@ -4836,6 +4837,7 @@ config.setValue( "Show/Racine",showRacine);
 config.setValue("Tools/ExtraPath",extra_path);
 config.setValue("Tools/OutputDir",useoutputdir);
 config.setValue("Tools/OutputDirName",outputsubdir);
+config.setValue("Tools/PostQuickBuild",postquickbuild);
 config.setValue("Tools/CleanWhenExit",clean_exit);
 
 config.setValue("Tools/Quick Mode",quickmode);
@@ -7944,6 +7946,7 @@ ERRPROCESS=false;
 checkViewerInstance=true;
 QString finame=getName();
 QFileInfo fi(finame);
+
 if (!finame.startsWith("untitled") && finame!="" && fi.suffix()=="asy")
    {
     QStringList asyCommandList=quick_asy_command.split("|");
@@ -8434,6 +8437,12 @@ else
   if (NoLatexErrors() && showoutputview) ViewLog();
   }
 checkViewerInstance=false;
+if (NoLatexErrors()) {
+    if (!postquickbuild.isEmpty()) {
+        const QString command = QString(postquickbuild).replace("%", finame);
+        RunCommand(command, false);
+    }
+}
 }
 
 void Texmaker::Latex()
@@ -9814,6 +9823,7 @@ confDlg->ui.lineEditSweave->setText(sweave_command);
 if (singleviewerinstance) confDlg->ui.checkBoxSingleInstanceViewer->setChecked(true);
 confDlg->ui.checkBoxTempBuild->setChecked(useoutputdir);
 confDlg->ui.lineEditTempBuildName->setText(outputsubdir);
+confDlg->ui.lineEditPostQuickBuild->setText(postquickbuild);
 confDlg->ui.checkBoxClean->setChecked(clean_exit);
 
 confDlg->ui.comboBoxFont->lineEdit()->setText(EditorFont.family() );
@@ -10031,6 +10041,7 @@ if (confDlg->exec())
 	singleviewerinstance=confDlg->ui.checkBoxSingleInstanceViewer->isChecked();
 	useoutputdir=confDlg->ui.checkBoxTempBuild->isChecked();
 	outputsubdir=confDlg->ui.lineEditTempBuildName->text();
+	postquickbuild=confDlg->ui.lineEditPostQuickBuild->text();
 	clean_exit=confDlg->ui.checkBoxClean->isChecked();
 	
 	if ((pdfviewerWidget) && keyToggleFocus!="none") pdfviewerWidget->setKeyEditorFocus(QKeySequence(keyToggleFocus));

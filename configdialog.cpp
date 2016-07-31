@@ -138,6 +138,7 @@ connect( ui.pushButtonLatexmk, SIGNAL(clicked()), this, SLOT(browseLatexmk()));
 
 connect( ui.pushButtonWizard, SIGNAL(clicked()), this, SLOT(userQuickWizard()));
 connect( ui.pushButtonAsyWizard, SIGNAL(clicked()), this, SLOT(asyQuickWizard()));
+connect( ui.pushButtonPostQuickBuild, SIGNAL(clicked()), this, SLOT(postQuickBuildBrowse()));
 
 connect(ui.shorttableWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(configureShortCut(QTableWidgetItem*)));
 connect(ui.pushButtonToggleFocus, SIGNAL(clicked()), this, SLOT(configureKeyToggle()));
@@ -657,6 +658,15 @@ if ( userquickdlg->exec() )
    ui.lineEditUserquick->setText(userquickdlg->userQuickCommand);
    }
 delete (userquickdlg);
+}
+
+void ConfigDialog::postQuickBuildBrowse()
+{
+QString location=QFileDialog::getOpenFileName(this,tr("Browse script"),QDir::rootPath(),"Executable (*)",0,QFileDialog::DontResolveSymlinks);
+if ( !location.isEmpty() ) 
+	{
+	ui.lineEditPostQuickBuild->setText( location + " %" );
+	}
 }
 
 void ConfigDialog::asyQuickWizard()
