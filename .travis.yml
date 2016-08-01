@@ -19,6 +19,7 @@ script:
 
 before_deploy:
  - sudo fpm -s dir -t deb -n texmaker-kostrykin -v "$TRAVIS_TAG" -d libqt4 -d zlib1g -d libpoppler-qt4 --prefix /usr/bin texmaker
+ - sudo chmod 666 $(ls *.deb)
 
 deploy:
   provider: releases
