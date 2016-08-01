@@ -22,7 +22,7 @@ TexmakerApp app("TexMaker", argc, argv );
 
 QStringList args = QCoreApplication::arguments();
 app.setApplicationName("TexMaker");
-app.setApplicationVersion(TEXMAKERVERSION);
+app.setApplicationVersion(VERSION);
 app.setOrganizationName("xm1");
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 1, 0))
 app.setAttribute(Qt::AA_UseHighDpiPixmaps);

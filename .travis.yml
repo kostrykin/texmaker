@@ -13,8 +13,8 @@ install:
  - sudo gem install fpm
 
 script:
- - qmake texmaker.pro
- - make VERSION="$TRAVIS_TAG"
+ - qmake texmaker.pro "VERSION=$TRAVIS_TAG"
+ - make
  - sudo make install
  - make distclean
 
