@@ -16,7 +16,6 @@ script:
  - qmake texmaker.pro "VERSION=$TRAVIS_TAG"
  - make
  - sudo make install
- - make distclean
 
 before_deploy:
  - sudo fpm -s dir -t deb -n texmaker-kostriykin -v "$TRAVIS_TAG" -d libqt4 -d zlib1g -d libpoppler-qt4 --prefix /usr/bin texmaker
