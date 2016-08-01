@@ -1,0 +1,32 @@
+sudo: required
+
+dist: trusty
+
+language: cpp
+
+before_install:
+ - sudo apt-get update -qq
+
+install:
+ - sudo apt-get install -qq build-essential ruby-dev
+ - sudo apt-get install -qq libqt4-dev zlib1g-dev libpoppler-qt4-dev
+ - sudo gem install fpm
+
+script:
+ - qmake texmaker.pro
+ - make VERSION="$TRAVIS_TAG"
+ - sudo make install
+ - make distclean
+
+before_deploy:
+ - fpm -s dir -t deb -n texmaker-kostriykin -v "$TRAVIS_TAG" -d libqt4 -d zlib1g -d libpoppler-qt4 --prefix /usr/bin texmaker
+
+deploy:
+  provider: releases
+  api_key:
+    secure: 0rQrIyegbbTM2B660mc0cguLVwzNVZQm3xtS5RiKwb50HLxpmWQJafPYUG4Cwj3+sXALgJf8ebkGTuH2Z3g/87ap7XoN0x5qdt1fPkgE43LUDPkezsBE8QX9Yf/Tk7igLwco6sf/6Jm5K4+eSs+WRbqjCghqKZrBNSiX/IfACDVVBJvINk4d9LJpc3BzvfaOEDgI890qw1OaVVGDm+Ubkwzsf2sxPw9E5o10AIpTAS4p79IlRo3rhRGvPi/niJXtHYtbLAcbwenB3WDp1TBrrgjnT+nC3Iz7dpQpTUzyRmU3ETmEH42WCtaf+hqoBuSor45umMEj+YiKnxfjfNANxzR1lPhNBpiw5EFWXZKQEabIGhF+hJVfd2RKeA2hoIojonDLo2bxsprSV+du4Lv5ta0NO5tkT2OmmyFuBAJmdIBHTNkmbvbgpqSCPFZ8j3paj9sx4Iec4ZJ2U6TgK6+UUhGoq4ad18L0iBR8Lmd1G8kPiiJjLz0RjHmVXP/KqJluiZDBVml1j00MiXfQTorcI2oAHVTb2k9bF8aptz0BTa4AJdB9CkvA3bQm92ZHBrN285f3Hu0wiWZClPIFzXOF7RgWM0Ke7K+cprb7/sj0RMhXmJM2TQT+9YhDiWCynJvYb4MFqH+pJwjMHDfFHX6X/uIEf5uOAm/LAJPESP2HXW4=
+  file: $(ls *.deb)
+  skip_cleanup: true
+  on:
+    tags: true
+

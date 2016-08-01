@@ -1,4 +1,5 @@
 *.swp
+*.deb
 Makefile
 /qrc_*.cpp
 /texmaker
