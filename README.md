@@ -1,5 +1,8 @@
 # Texmaker 4.5 Fork
 
+Build statuses: ![master](https://travis-ci.org/kostrykin/texmaker.svg?branch=master) on `master` branch
+and ![develop](https://travis-ci.org/kostrykin/texmaker.svg?branch=develop) on `develop` branch
+
 ## Features
 
 The currently added features are:
