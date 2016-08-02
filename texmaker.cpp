@@ -8439,7 +8439,7 @@ else
 checkViewerInstance=false;
 if (NoLatexErrors()) {
     if (!postquickbuild.isEmpty()) {
-        const QString command = QString(postquickbuild).replace("%", finame);
+        const QString command = QString(postquickbuild).replace("%", "\"" + finame + "\"");
         RunCommand(command, false);
     }
 }
