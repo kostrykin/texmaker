@@ -597,7 +597,9 @@ Act = new QAction(getIcon(":/images/bookmark3.png"),tr("Click to jump to the boo
 connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark3()));
 centralToolBarBis->addAction(Act);
 
-EditorView=new QStackedWidget(centralFrame);
+EditorView = new QStackedWidget( centralFrame );
+EditorView->setAutoFillBackground( true );
+EditorView->setBackgroundRole( QPalette::Dark );
 
 connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateCaption()) );
 connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
@@ -2739,37 +2741,55 @@ if (currentEditorView())
 
 void Texmaker::fileNew()
 {
-LatexEditorView *edit = new LatexEditorView(0,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),"untitled"+QString::number(untitled_id),userTagsList);
-edit->editor->setReadOnly(false);
-edit->editor->setEncoding(input_encoding);
-initCompleter();
-if (completion) edit->editor->setCompleter(completer);
-else edit->editor->setCompleter(0);
-EditorView->addWidget( edit);
-EditorView->setCurrentIndex(EditorView->indexOf(edit));
-if (wordwrap) {edit->editor->setWordWrapMode(QTextOption::WordWrap);}
-else {edit->editor->setWordWrapMode(QTextOption::NoWrap);}
-filenames.remove( edit);
-filenames.insert( edit, "untitled"+QString::number(untitled_id) );
-ComboFilesInsert("untitled"+QString::number(untitled_id));
-untitled_id++;
-edit->editor->document()->setModified(false);
-connect(edit->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-connect(edit->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-connect(edit->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-connect(edit->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-connect(edit->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-currentEditorView()->editor->setLastNumLines(currentEditorView()->editor->numoflines());
-connect(edit->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-connect(edit->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-connect(edit->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-connect(edit->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
-UpdateCaption();
-NewDocumentStatus(false);
-edit->editor->setFocus();
+    LatexEditorView* const view = new LatexEditorView( 0, EditorFont, svnEnable, showline, edcolors(), hicolors(), inlinespellcheck
+                                                     , spell_ignored_words, spellChecker, tabspaces, tabwidth, QKeySequence( keyToggleFocus )
+                                                     , "untitled" + QString::number( untitled_id ), userTagsList );
+    view->editor->setReadOnly( false );
+    view->editor->setEncoding( input_encoding );
+    initCompleter();
+    if( completion )
+    {
+        view->editor->setCompleter( completer );
+    }
+    else
+    {
+        view->editor->setCompleter( 0 );
+    }
+    EditorView->addWidget( view );
+    EditorView->setCurrentIndex( EditorView->indexOf( view ) );
+    if( wordwrap )
+    {
+        view->editor->setWordWrapMode( QTextOption::WordWrap );
+    }
+    else
+    {
+        view->editor->setWordWrapMode( QTextOption::NoWrap );
+    }
+    filenames.remove( view );
+    filenames.insert( view, "untitled" + QString::number( untitled_id ) );
+    ComboFilesInsert( "untitled" + QString::number( untitled_id ) );
+    ++untitled_id;
+    view->editor->document()->setModified( false );
+    currentEditorView()->editor->setLastNumLines( currentEditorView()->editor->numoflines() );
+
+    connect( view->editor->document(), SIGNAL( modificationChanged( bool ) ),    this, SLOT( NewDocumentStatus( bool ) ) );
+    connect( view->editor->document(), SIGNAL(       undoAvailable( bool ) ), UndoAct, SLOT(        setEnabled( bool ) ) );
+    connect( view->editor->document(), SIGNAL(       redoAvailable( bool ) ), RedoAct, SLOT(        setEnabled( bool ) ) );
+    connect( view->editor            , SIGNAL(       copyAvailable( bool ) ),  CutAct, SLOT(        setEnabled( bool ) ) );
+    connect( view->editor            , SIGNAL(       copyAvailable( bool ) ), CopyAct, SLOT(        setEnabled( bool ) ) );
+
+    connect( view->editor, SIGNAL(                spellme(     ) ), this, SLOT(            editSpell(     ) ) );
+    connect( view->editor, SIGNAL(             tooltiptab(     ) ), this, SLOT(           editTipTab(     ) ) );
+    connect( view->editor, SIGNAL( requestUpdateStructure(     ) ), this, SLOT(      UpdateStructure(     ) ) );
+    connect( view->editor, SIGNAL(             requestpdf( int ) ), this, SLOT(        jumpToPdfline( int ) ) );
+    connect( view->editor, SIGNAL(        numLinesChanged( int ) ), this, SLOT( refreshAllFromCursor( int ) ) );
+    connect( view->editor, SIGNAL(   requestGotoStructure( int ) ), this, SLOT(      jumpToStructure( int ) ) );
+
+    connect( view->editor, SIGNAL( poshaschanged( int, int ) ), this, SLOT( showCursorPos( int, int ) ) );
+
+    UpdateCaption();
+    NewDocumentStatus(false);
+    view->editor->setFocus();
 }
 
 void Texmaker::fileNewFromFile()
