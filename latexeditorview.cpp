@@ -17,186 +17,205 @@
 #include <QLineEdit>
 #include <QTextBlock>
 
-LatexEditorView::LatexEditorView(QWidget *parent,QFont & efont,bool svn,bool line,QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling,QString ignoredWords,Hunspell *spellChecker,bool tabspaces, int tabwidth,const QKeySequence viewfocus,QString name,QStringList ulist) : QWidget(parent)
+
+LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, bool svn, bool line, const QList< QColor >& edcolors
+                                , const QList< QColor >& hicolors, bool inlinespelling, const QString& ignoredWords, Hunspell* const spellChecker
+                                , bool tabspaces, int tabwidth, const QKeySequence& viewfocus, const QString& name, const QStringList& ulist )
+    : QWidget( parent )
+    , splitter( new MiniSplitter( this ) )
+    , Stack( new QStackedWidget( this ) )
+    , findwidget( new FindWidget( this->Stack ) )
+    , replacewidget( new ReplaceWidget( this->Stack ) )
+    , gotolinewidget( new GotoLineWidget( this->Stack ) )
 {
-  
-splitter=new MiniSplitter(this);
-splitter->setOrientation(Qt::Vertical);
+    splitter->setOrientation( Qt::Vertical );
+    
+    QFrame* const framebis = new QFrame( splitter );
+    framebis->setLineWidth( 0 );
+    framebis->setFrameShape ( QFrame::NoFrame );
+    framebis->setFrameShadow( QFrame::Plain   );
+    framebis->setFrameStyle ( QFrame::NoFrame );
+    
+    QVBoxLayout* const mainlay = new QVBoxLayout( framebis );
+    mainlay->setSpacing( 0 );
+    mainlay->setMargin( 0 );
+    
+    QFrame* const frame = new QFrame( framebis );
+    frame->setLineWidth( 1 );
+    frame->setFrameShape ( QFrame::NoFrame );
+    frame->setFrameShadow( QFrame::Plain   );
+    frame->setFrameStyle ( QFrame::NoFrame );
+    mainlay->addWidget( frame );
+    
+    const QFontMetrics fm( efont );
+    this->lineNumberPalette.setColor( QPalette::Window, edcolors.at( 1 ) );
 
-QFrame *framebis=new QFrame(splitter);
-framebis->setLineWidth(0);
-framebis->setFrameShape(QFrame::NoFrame);
-framebis->setFrameShadow(QFrame::Plain);
-framebis->setFrameStyle(QFrame::NoFrame);
+    editor = new LatexEditor( frame, efont, edcolors, hicolors, inlinespelling, ignoredWords, spellChecker, tabspaces, tabwidth, viewfocus, name, ulist );
+    lineNumberWidget = new LineNumberWidget( editor, frame, svn );
+    lineNumberWidget->setFont( efont );
+    lineNumberWidget->setPalette( this->lineNumberPalette );
+    lineNumberWidget->setAutoFillBackground( true );
+    lineNumberWidget->setBackgroundRole( QPalette::Window );
+    lineNumberWidget->setFixedWidth( fm.width( "00000" ) + 32 );
 
-
-QVBoxLayout* mainlay = new QVBoxLayout(framebis );
-mainlay->setSpacing(0);
-mainlay->setMargin(0);
-
-
-QFrame *frame=new QFrame(framebis);
-frame->setLineWidth(1);
-frame->setFrameShape(QFrame::NoFrame);
-frame->setFrameShadow(QFrame::Plain);
-frame->setFrameStyle(QFrame::NoFrame);
-mainlay->addWidget(frame);
-
-editor=new LatexEditor(frame,efont,edcolors,hicolors,inlinespelling,ignoredWords,spellChecker,tabspaces,tabwidth,viewfocus,name,ulist);
-m_lineNumberWidget = new LineNumberWidget( editor, frame,svn);
-m_lineNumberWidget->setFont(efont);
-QFontMetrics fm( efont );
-m_lineNumberWidget->setFixedWidth( fm.width( "00000" ) + 32 );
-QHBoxLayout* lay = new QHBoxLayout( frame );
-lay->setSpacing(0);
-lay->setMargin(0);
-lay->addWidget( m_lineNumberWidget );
-lay->addWidget( editor );
-setFocusProxy( editor );
-setLineNumberWidgetVisible(line);
-
-Stack=new QStackedWidget(this);
-Stack->setLineWidth(0);
-Stack->setFrameShape(QFrame::NoFrame);
-Stack->setFrameShadow(QFrame::Plain);
-
-findwidget=new FindWidget(Stack);
-Stack->addWidget(findwidget);
-findwidget->SetEditor(editor);
-connect(findwidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
-connect(findwidget, SIGNAL( requestExtension() ), this, SLOT( updateFind() ) );
-
-
-replacewidget=new ReplaceWidget(Stack);
-Stack->addWidget(replacewidget);
-replacewidget->SetEditor(editor);
-connect(replacewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
-connect(replacewidget, SIGNAL( requestExtension() ), this, SLOT( updateReplace() ) );
-
-connect(editor,SIGNAL(textChanged()), this, SLOT( updateInSelection() ) );
-
-gotolinewidget=new GotoLineWidget(Stack);
-Stack->addWidget(gotolinewidget);
-gotolinewidget->SetEditor(editor);
-connect(gotolinewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
-
-Stack->hide();
-
-splitter->addWidget(framebis);
-splitter->addWidget(Stack);
-QVBoxLayout *mainlayout= new QVBoxLayout(this);
-mainlayout->setSpacing(0);
-mainlayout->setMargin(0);
-mainlayout->addWidget(splitter);
+    QHBoxLayout* const lay = new QHBoxLayout( frame );
+    lay->setSpacing( 0 );
+    lay->setMargin( 0 );
+    lay->addWidget( lineNumberWidget );
+    lay->addWidget( editor );
+    setFocusProxy( editor );
+    setLineNumberWidgetVisible( line );
+    
+    Stack->setLineWidth( 0 );
+    Stack->setFrameShape( QFrame::NoFrame );
+    Stack->setFrameShadow( QFrame::Plain );
+    
+    Stack->addWidget( findwidget );
+    findwidget->SetEditor( editor );
+    connect( findwidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
+    connect( findwidget, SIGNAL( requestExtension() ), this, SLOT( updateFind() ) );
+    
+    Stack->addWidget( replacewidget );
+    replacewidget->SetEditor( editor );
+    connect( replacewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
+    connect( replacewidget, SIGNAL( requestExtension() ), this, SLOT( updateReplace() ) );
+    
+    connect( editor, SIGNAL( textChanged() ), this, SLOT( updateInSelection() ) );
+    
+    Stack->addWidget( gotolinewidget );
+    gotolinewidget->SetEditor( editor );
+    connect( gotolinewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
+    
+    Stack->hide();
+    
+    splitter->addWidget( framebis );
+    splitter->addWidget( Stack );
+    QVBoxLayout* const mainlayout = new QVBoxLayout( this );
+    mainlayout->addWidget( splitter );
+    mainlayout->setSpacing( 0 );
+    mainlayout->setMargin( 0 );
 }
+
 
 LatexEditorView::~LatexEditorView()
 {
 }
 
+
 void LatexEditorView::setLineNumberWidgetVisible( bool b )
 {
-    if( b ){
-	m_lineNumberWidget->show();
-    } else {
-	m_lineNumberWidget->hide();
+    if( b )
+    {
+	lineNumberWidget->show();
+    }
+    else
+    {
+	lineNumberWidget->hide();
     }
 }
 
-void LatexEditorView::changeSettings(QFont & new_font,bool svn,bool line)
+void LatexEditorView::changeSettings( const QFont& new_font, bool svn, bool line )
 {
-  editor->changeFont(new_font);
-  m_lineNumberWidget->setFont(new_font);
-  QFontMetrics fm( new_font );
-  m_lineNumberWidget->setFixedWidth( fm.width( "00000" ) + 32 );
-  m_lineNumberWidget->setSvn(svn);
-  setLineNumberWidgetVisible(line);
+    editor->changeFont( new_font );
+    lineNumberWidget->setFont( new_font );
+
+    const QFontMetrics fm( new_font );
+    lineNumberWidget->setFixedWidth( fm.width( "00000" ) + 32 );
+    lineNumberWidget->setSvn( svn );
+    setLineNumberWidgetVisible( line );
 }
+
 
 void LatexEditorView::showFind()
 {
-QList<int> sizes;
-sizes  << height()-findwidget->height() << findwidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(findwidget);
-Stack->setMaximumHeight(findwidget->minimumSizeHint().height());
-Stack->show();
-QTextCursor c =editor->textCursor();
-if (c.hasSelection()) findwidget->ui.comboFind->lineEdit()->setText(c.selectedText());
-findwidget->ui.comboFind->setFocus();
-findwidget->ui.comboFind->lineEdit()->selectAll();
+    updateFind();
 }
+
 
 void LatexEditorView::updateFind()
 {
-QList<int> sizes;
-sizes  << height()-findwidget->height() << findwidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(findwidget);
-Stack->setMaximumHeight(findwidget->minimumSizeHint().height());
-Stack->show();
-QTextCursor c =editor->textCursor();
-if (c.hasSelection()) findwidget->ui.comboFind->lineEdit()->setText(c.selectedText());
-findwidget->ui.comboFind->setFocus();
-findwidget->ui.comboFind->lineEdit()->selectAll();
+    QList< int > sizes;
+    sizes << height() - findwidget->height() << findwidget->height();
+
+    splitter->setSizes( sizes );
+    Stack->setCurrentWidget( findwidget );
+    Stack->setMaximumHeight( findwidget->minimumSizeHint().height() );
+    Stack->show();
+
+    const QTextCursor& cursor = editor->textCursor();
+    if( cursor.hasSelection() )
+    {
+        findwidget->ui.comboFind->lineEdit()->setText( cursor.selectedText() );
+    }
+
+    findwidget->ui.comboFind->setFocus();
+    findwidget->ui.comboFind->lineEdit()->selectAll();
 }
+
 
 void LatexEditorView::showFindNext()
 {
-QList<int> sizes;
-sizes << height()-findwidget->height() << findwidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(findwidget);
-Stack->setMaximumHeight(findwidget->minimumSizeHint().height());
-Stack->show();
-if (findwidget->ui.comboFind->lineEdit()->text()!="") findwidget->doFind();
+    QList< int > sizes;
+    sizes << height() - findwidget->height() << findwidget->height();
+    splitter->setSizes( sizes );
+
+    Stack->setCurrentWidget( findwidget );
+    Stack->setMaximumHeight( findwidget->minimumSizeHint().height() );
+    Stack->show();
+
+    if( !findwidget->ui.comboFind->lineEdit()->text().isEmpty() )
+    {
+        findwidget->doFind();
+    }
 }
+
 
 void LatexEditorView::showReplace()
 {
-QList<int> sizes;
-sizes  << height()-replacewidget->height() << replacewidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(replacewidget);
-Stack->setMaximumHeight(replacewidget->minimumSizeHint().height());
-Stack->show();
-QTextCursor c =editor->textCursor();
-if (c.hasSelection()) replacewidget->ui.comboFind->lineEdit()->setText(c.selectedText());
-replacewidget->ui.comboFind->setFocus();
-replacewidget->ui.comboFind->lineEdit()->selectAll();
+    updateReplace();
 }
+
 
 void LatexEditorView::updateReplace()
 {
-QList<int> sizes;
-sizes  << height()-replacewidget->height() << replacewidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(replacewidget);
-Stack->setMaximumHeight(replacewidget->minimumSizeHint().height());
-Stack->show();
-QTextCursor c =editor->textCursor();
-if (c.hasSelection()) replacewidget->ui.comboFind->lineEdit()->setText(c.selectedText());
-replacewidget->ui.comboFind->setFocus();
-replacewidget->ui.comboFind->lineEdit()->selectAll();
+    QList< int > sizes;
+    sizes << height() - replacewidget->height() << replacewidget->height();
+    splitter->setSizes( sizes );
+
+    Stack->setCurrentWidget( replacewidget );
+    Stack->setMaximumHeight( replacewidget->minimumSizeHint().height() );
+    Stack->show();
+
+    const QTextCursor& cursor = editor->textCursor();
+    if( cursor.hasSelection() )
+    {
+        replacewidget->ui.comboFind->lineEdit()->setText( cursor.selectedText() );
+    }
+
+    replacewidget->ui.comboFind->setFocus();
+    replacewidget->ui.comboFind->lineEdit()->selectAll();
 }
+
 
 void LatexEditorView::showGoto()
 {
-QList<int> sizes;
-sizes  << height()-gotolinewidget->height() << gotolinewidget->height();
-splitter->setSizes( sizes );
-Stack->setCurrentWidget(gotolinewidget);
-Stack->setMaximumHeight(gotolinewidget->minimumSizeHint().height());
-Stack->show();
-gotolinewidget->ui.spinLine->setFocus();
-gotolinewidget->ui.spinLine->setMinimum( 1 );
-gotolinewidget->ui.spinLine->setMaximum(editor->numoflines() );
-gotolinewidget->ui.spinLine->selectAll();
+    QList< int > sizes;
+    sizes << height()-gotolinewidget->height() << gotolinewidget->height();
+    splitter->setSizes( sizes );
+
+    Stack->setCurrentWidget( gotolinewidget );
+    Stack->setMaximumHeight( gotolinewidget->minimumSizeHint().height() );
+    Stack->show();
+
+    gotolinewidget->ui.spinLine->setFocus();
+    gotolinewidget->ui.spinLine->setMinimum( 1 );
+    gotolinewidget->ui.spinLine->setMaximum( editor->numoflines() );
+    gotolinewidget->ui.spinLine->selectAll();
 }
+
 
 void LatexEditorView::updateInSelection()
 {
-findwidget->ui.checkSelection->setChecked( false );
+    findwidget->ui.checkSelection->setChecked( false );
 }
-
 

@@ -24,10 +24,6 @@ LineNumberWidget::LineNumberWidget(LatexEditor* editor, QWidget* parent,bool svn
 	  m_editor( editor ),
 	  m_svn (svn)
 {
-setAutoFillBackground( true );
-QPalette p( palette() );
-p.setColor( backgroundRole(), QColor( "#DEE4EB" ) );
-setPalette( p );
 //setToolTip(tr("Click to add or remove a bookmark"));
 start=-1;
 end=-1;
@@ -66,8 +62,7 @@ QTextBlock np;
 QString numtext;
 
 
-painter.setPen(oldpen);
-painter.drawLine(width()-2,0,width()-2,height());
+painter.setPen(oldpen); //< probably obsolete
 
 rangepen.setWidth(1);
 int rmin=-1;

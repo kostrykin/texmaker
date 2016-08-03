@@ -458,7 +458,7 @@ return newstruct;
 }
 
 
-LatexEditor::LatexEditor(QWidget *parent,QFont & efont, QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling,QString ignoredWords,Hunspell *spellChecker,bool tabspaces,int tabwidth,const QKeySequence viewfocus, QString name,QStringList ulist) : QPlainTextEdit(parent),c(0),lastSaveRevision(0)
+LatexEditor::LatexEditor(QWidget *parent, const QFont & efont, QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling,QString ignoredWords,Hunspell *spellChecker,bool tabspaces,int tabwidth,const QKeySequence viewfocus, QString name,QStringList ulist) : QPlainTextEdit(parent),c(0),lastSaveRevision(0)
 {
   
 QScriptValue appContext = fScriptEngine.newQObject(this); 
@@ -1169,7 +1169,7 @@ if (cur.hasSelection())
 	}
 }
 
-void LatexEditor::changeFont(QFont & new_font)
+void LatexEditor::changeFont(const QFont & new_font)
 {
 setFont(new_font);
 }

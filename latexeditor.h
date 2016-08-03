@@ -64,7 +64,7 @@ QList<StructItem> list;
 class LatexEditor : public QPlainTextEdit  {
    Q_OBJECT
 public:
-LatexEditor(QWidget *parent,QFont & efont, QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling=false, QString ignoredWords="",Hunspell *spellChecker=0,bool tabspaces=false,int tabwidth=4,const QKeySequence viewfocus=QKeySequence("Ctrl+Space"), QString name="",QStringList ulist=QStringList());
+LatexEditor(QWidget *parent,const QFont & efont, QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling=false, QString ignoredWords="",Hunspell *spellChecker=0,bool tabspaces=false,int tabwidth=4,const QKeySequence viewfocus=QKeySequence("Ctrl+Space"), QString name="",QStringList ulist=QStringList());
 ~LatexEditor();
 static void clearMarkerFormat(const QTextBlock &block, int markerId);
 void gotoLine( int line );
@@ -75,7 +75,7 @@ void commentSelection();
 void uncommentSelection();
 void indentSelection();
 void unindentSelection();
-void changeFont(QFont & new_font);
+void changeFont(const QFont & new_font);
 QString getEncoding();
 void setEncoding(QString enc);
 int getCursorPosition(int parag, int index);

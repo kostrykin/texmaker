@@ -10333,11 +10333,6 @@ QTextBlock p = currentEditorView()->editor->textCursor().block();
 int currentline=p.blockNumber();
 int i=currentline-1;
 QList<int> start,end;
-/* QMapIterator<int, int> it(currentEditorView()->editor->foldedLines);
- while (it.hasNext()) {
-     it.next();
-     qDebug() << "avant folded" << it.key() << ":" << it.value();
- }*/
 while (p.isValid())
   {
   if (currentEditorView()->editor->foldedLines.keys().contains(i))
@@ -10357,18 +10352,18 @@ currentEditorView()->editor->setLastNumLines(newnumlines);
 
 void Texmaker::refreshRange()
 {
-currentEditorView()->editor->foldableLines.clear();
-int endpreamble = currentEditorView()->editor->searchLine("\\begin{document}");
-if (endpreamble>1) currentEditorView()->editor->foldableLines.insert(0,endpreamble-1);
-int nb=StructureTreeWidget->topLevelItemCount();
-if (nb>0)
+    currentEditorView()->editor->foldableLines.clear();
+    int endpreamble = currentEditorView()->editor->searchLine("\\begin{document}");
+    if (endpreamble>1) currentEditorView()->editor->foldableLines.insert(0,endpreamble-1);
+    int nb=StructureTreeWidget->topLevelItemCount();
+    if (nb>0)
     {
-    for (int i = 0; i < nb; i++) 
-	{
-	ParseTree(StructureTreeWidget->topLevelItem(i));
-	}
+        for (int i = 0; i < nb; i++) 
+    	{
+    	    ParseTree(StructureTreeWidget->topLevelItem(i));
+    	}
     }
-currentEditorView()->editor->matchAll();
+    currentEditorView()->editor->matchAll();
 }
 
 void Texmaker::jumpToStructure(int line)

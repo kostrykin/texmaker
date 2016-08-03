@@ -25,29 +25,45 @@
 #include "minisplitter.h"
 #include "hunspell/hunspell.hxx"
 
+
 class LatexEditorView : public QWidget  {
+
    Q_OBJECT
+
 public: 
-	LatexEditorView(QWidget *parent, QFont & efont,bool svn,bool line,QList<QColor> edcolors, QList<QColor> hicolors,bool inlinespelling=false, QString ignoredWords="",Hunspell *spellChecker=0,bool tabspaces=false,int tabwidth=4,const QKeySequence viewfocus=QKeySequence("Ctrl+Space"), QString name="", QStringList ulist=QStringList());
-	~LatexEditorView();
-  LatexEditor *editor;
-  void changeSettings(QFont & new_font,bool svn,bool line);
-  void showFind();
-  void showFindNext();
-  void showGoto();
-  void showReplace();
+
+    LatexEditorView( QWidget* const parent, const QFont& efont, bool svn, bool line, const QList< QColor >& edcolors, const QList< QColor >& hicolors
+                   , bool inlinespelling = false, const QString& ignoredWords = "", Hunspell* const spellChecker = 0, bool tabspaces = false, int tabwidth = 4
+                   , const QKeySequence& viewfocus = QKeySequence( "Ctrl+Space" ), const QString& name = "", const QStringList& ulist = QStringList());
+
+    ~LatexEditorView();
+
+    LatexEditor* editor;
+
+    void changeSettings( const QFont& new_font, bool svn, bool line );
+    void showFind();
+    void showFindNext();
+    void showGoto();
+    void showReplace();
+
 private slots:
-void updateFind();
-void updateReplace();
-void updateInSelection();
+
+    void updateFind();
+    void updateReplace();
+    void updateInSelection();
+
 private:
-  MiniSplitter *splitter;
-  LineNumberWidget* m_lineNumberWidget;
-  void setLineNumberWidgetVisible( bool );
-  QStackedWidget *Stack;
-  FindWidget *findwidget;
-  ReplaceWidget *replacewidget;
-  GotoLineWidget *gotolinewidget;
+
+    QPalette lineNumberPalette;
+    MiniSplitter* const splitter;
+    LineNumberWidget* lineNumberWidget;
+    QStackedWidget* const Stack;
+    FindWidget* const findwidget;
+    ReplaceWidget* const replacewidget;
+    GotoLineWidget* const gotolinewidget;
+  
+    void setLineNumberWidgetVisible( bool );
+
 };
 
 #endif
