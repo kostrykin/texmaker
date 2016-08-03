@@ -51,6 +51,8 @@ fileMenu->addAction(tr("Exit"), this, SLOT(close()));
 if (showToolBar)
     {
     QToolBar *toolBar = addToolBar("Navigation");
+    toolBar->setMovable( false );
+    toolBar->setFloatable( false );
     toolBar->setIconSize(QSize(22,22 ));
     QAction *Act;
     Act = new QAction(getIcon(":/images/home.png"), tr("Index"), this);

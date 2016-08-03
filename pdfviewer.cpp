@@ -180,6 +180,8 @@ editMenu->addAction(findAct);
 
 
 QToolBar *toolBar = addToolBar("Pdf controls");
+toolBar->setMovable( false );
+toolBar->setFloatable( false );
 toolBar->setObjectName("Pdf controls");
 
 upAct = new QAction(getIcon(":/images/up.png"), tr("Previous"), this);

@@ -2114,6 +2114,8 @@ QStringList list;
 bool gtkEnv=gtkSession();
 //file
 fileToolBar = addToolBar("File ToolBar");
+fileToolBar->setMovable( false );
+fileToolBar->setFloatable( false );
 fileToolBar->setObjectName("File");
 
 if (gtkEnv) Act = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/filenew.png")), tr("New"), this);
@@ -2130,6 +2132,8 @@ fileToolBar->addAction(SaveAct);
 
 //edit
 editToolBar = addToolBar("Edit ToolBar");
+editToolBar->setMovable( false );
+editToolBar->setFloatable( false );
 editToolBar->setObjectName("Edit");
 editToolBar->addAction(UndoAct);
 editToolBar->addAction(RedoAct);
@@ -2139,6 +2143,8 @@ editToolBar->addAction(PasteAct);
 
 //tools
 runToolBar = addToolBar("Tools Toolbar");
+runToolBar->setMovable( false );
+runToolBar->setFloatable( false );
 runToolBar->setObjectName("Tools");
 
 list.clear();
