@@ -264,52 +264,52 @@ void ConfigDialog::restoreColors()
 {
 QTableWidgetItem *colorItem;
 
-colorItem= new QTableWidgetItem("#FFFFFF");
+colorItem= new QTableWidgetItem("#fdf6e3"); // background
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(0,1,colorItem);
 
-colorItem= new QTableWidgetItem("#ececec");
+colorItem= new QTableWidgetItem("#eee8d5"); // current line
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(1,1,colorItem);
 
-colorItem= new QTableWidgetItem("#FF0000");
+colorItem= new QTableWidgetItem("#ff0000"); // highlighted line
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(2,1,colorItem);
 
-colorItem= new QTableWidgetItem("#000000");
+colorItem= new QTableWidgetItem("#586e75"); // text
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(3,1,colorItem);
 
-colorItem= new QTableWidgetItem("#606060");
+colorItem= new QTableWidgetItem("#93a1a1"); // comment
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(4,1,colorItem);
 
-colorItem= new QTableWidgetItem("#008000");
+colorItem= new QTableWidgetItem("#859900"); // math
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(5,1,colorItem);
 
-colorItem= new QTableWidgetItem("#800000");
+colorItem= new QTableWidgetItem("#268bd2"); // latex command
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(6,1,colorItem);
 
-colorItem= new QTableWidgetItem("#0000CC");
+colorItem= new QTableWidgetItem("#d33682"); // structure
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(7,1,colorItem);
 
-colorItem= new QTableWidgetItem("#9A4D00");
+colorItem= new QTableWidgetItem("#b58900"); // verbatim / graphics environments
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(8,1,colorItem);
 
-colorItem= new QTableWidgetItem("#FF0000");
+colorItem= new QTableWidgetItem("#cb4b16"); // todo
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(9,1,colorItem);
 
-colorItem= new QTableWidgetItem("#006699");
+colorItem= new QTableWidgetItem("#b58900"); // graphic keywords
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(10,1,colorItem);
 
 
-colorItem= new QTableWidgetItem("#660066");
+colorItem= new QTableWidgetItem("#b58900"); // graphic numbers
 colorItem->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable);
 ui.colortableWidget->setItem(11,1,colorItem);
 }
