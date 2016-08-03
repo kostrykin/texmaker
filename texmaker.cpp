@@ -97,609 +97,622 @@
 #include "x11fontdialog.h"
 #endif
 
-Texmaker::Texmaker(QWidget *parent)
-    : QMainWindow(parent)
+
+static QString temporaryDirectory()
 {
-eraseSettings=false;
-replaceSettings=false;
-
-ReadSettings();
-
-
-QString tempDir=QDir::tempPath();
-#if defined(Q_OS_UNIX) || defined(Q_OS_MAC)
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-QString path=QStandardPaths::writableLocation(QStandardPaths::CacheLocation);
-if (QDir().mkpath(path)) tempDir=path;
-#else
-QString path=QDesktopServices::storageLocation(QDesktopServices::CacheLocation);
-if (QDir().mkpath(path)) tempDir=path;
-#endif
-#endif
-QString prefixFile=QDir::homePath();
-prefixFile="tks_temp_"+prefixFile.section('/',-1);
-prefixFile=QString(QUrl::toPercentEncoding(prefixFile));
-prefixFile.remove("%");
-sessionTempFile=tempDir+"/"+prefixFile+".tks";
-
- if (spelldicExist()) 
-       {
-       QString dic=spell_dic.left(spell_dic.length()-4);
-       spellChecker = new Hunspell(dic.toLatin1()+".aff",dic.toLatin1()+".dic");
-       }
- else spellChecker=0;
-
-untitled_id=1;
-
-
-#if defined(Q_OS_MAC)
-setWindowIcon(QIcon(":/images/logo128.png"));
-#else
-setWindowIcon(getIcon(":/images/appicon.png"));
-#endif
-QApplication::setOrganizationName("Xm1");
-QApplication::setApplicationName("Texmaker"); 
-
-setIconSize(QSize(22,22 ));
- 
-completer = new QCompleter(this);
-initCompleter();
-
-
-QAction *Act;
-splitter1=new MiniSplitter(this);
-splitter1->setOrientation(Qt::Horizontal);
-splitter2=new MiniSplitter(splitter1);
-splitter2->setOrientation(Qt::Vertical);
-// PANNEAU STRUCTURE
-
-LeftPanelFrameBis=new QFrame(this);
-LeftPanelFrameBis->setLineWidth(0);
-LeftPanelFrameBis->setFrameShape(QFrame::NoFrame);
-LeftPanelFrameBis->setFrameShadow(QFrame::Plain);
-
-
-
-LeftPanelToolBarBis=new QToolBar("TitleBar",LeftPanelFrameBis);
-LeftPanelToolBarBis->setFloatable(false);
-LeftPanelToolBarBis->setOrientation(Qt::Horizontal);
-LeftPanelToolBarBis->setMovable(false);
-LeftPanelToolBarBis->setIconSize(QSize(16,16 ));
-LeftPanelToolBarBis->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-
-QFrame *LeftPanelFrame=new QFrame(this);
-LeftPanelFrame->setLineWidth(0);
-LeftPanelFrame->setFrameShape(QFrame::NoFrame);
-LeftPanelFrame->setFrameShadow(QFrame::Plain);
-
-splitter3=new MiniSplitter(splitter1);
-splitter3->setOrientation(Qt::Vertical);
-
-LeftPanelLayout= new QHBoxLayout(LeftPanelFrame);
-LeftPanelToolBar=new QToolBar("LogToolBar",LeftPanelFrame);
-LeftPanelToolBar->setFloatable(false);
-LeftPanelToolBar->setOrientation(Qt::Vertical);
-LeftPanelToolBar->setMovable(false);
-LeftPanelToolBar->setIconSize(QSize(16,16 ));
-
-
-LeftPanelStackedWidget=new QStackedWidget(LeftPanelFrame);
-
-
-
-StructureTreeWidget=new QTreeWidget(LeftPanelStackedWidget);
-StructureTreeWidget->setFrameStyle(QFrame::NoFrame);
-StructureTreeWidget->setColumnCount(1);
-StructureTreeWidget->header()->hide();
-StructureTreeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-StructureTreeWidget->header()->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-StructureTreeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-#else
-StructureTreeWidget->header()->setResizeMode(0, QHeaderView::ResizeToContents);
-#endif
-StructureTreeWidget->header()->setStretchLastSection(false);
-
-connect( StructureTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem *,int )), SLOT(ClickedOnStructure(QTreeWidgetItem *,int)));
-
-connect(LeftPanelToolBar->addAction(getIcon(":/images/structure.png"),tr("Structure")), SIGNAL(triggered()), this, SLOT(ShowStructure()));
-LeftPanelStackedWidget->addWidget(StructureTreeWidget);
-
-OpenedFilesListWidget=new QListWidget(LeftPanelFrame);
-OpenedFilesListWidget->setFrameStyle(QFrame::NoFrame);
-connect(OpenedFilesListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(OpenedFileActivated(QListWidgetItem*)));
-
-
-LeftPanelToolBar->addSeparator();
-
-
-RelationListWidget=new SymbolListWidget(LeftPanelStackedWidget,0);
-RelationListWidget->setFrameStyle(QFrame::NoFrame);
-connect(RelationListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-relationAct = new QAction(getIcon(":/images/math1.png"),tr("Relation symbols"), this);
-connect(relationAct, SIGNAL(triggered()), this, SLOT(ShowRelation()));
-LeftPanelToolBar->addAction(relationAct);
-connect(RelationListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(RelationListWidget);
-
-
-ArrowListWidget=new SymbolListWidget(LeftPanelStackedWidget,1);
-ArrowListWidget->setFrameStyle(QFrame::NoFrame);
-connect(ArrowListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-arrowAct = new QAction(getIcon(":/images/math2.png"),tr("Arrow symbols"), this);
-connect(arrowAct, SIGNAL(triggered()), this, SLOT(ShowArrow()));
-LeftPanelToolBar->addAction(arrowAct);
-connect(ArrowListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(ArrowListWidget);
-
-MiscellaneousListWidget=new SymbolListWidget(LeftPanelStackedWidget,2);
-MiscellaneousListWidget->setFrameStyle(QFrame::NoFrame);
-connect(MiscellaneousListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-miscAct = new QAction(getIcon(":/images/math3.png"),tr("Miscellaneous symbols"), this);
-connect(miscAct, SIGNAL(triggered()), this, SLOT(ShowMisc()));
-LeftPanelToolBar->addAction(miscAct);
-connect(MiscellaneousListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(MiscellaneousListWidget);
-
-DelimitersListWidget=new SymbolListWidget(LeftPanelStackedWidget,3);
-DelimitersListWidget->setFrameStyle(QFrame::NoFrame);
-connect(DelimitersListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-delimAct = new QAction(getIcon(":/images/math4.png"),tr("Delimiters"), this);
-connect(delimAct, SIGNAL(triggered()), this, SLOT(ShowDelim()));
-LeftPanelToolBar->addAction(delimAct);
-connect(DelimitersListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(DelimitersListWidget);
-
-GreekListWidget=new SymbolListWidget(LeftPanelStackedWidget,4);
-GreekListWidget->setFrameStyle(QFrame::NoFrame);
-connect(GreekListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-greekAct = new QAction(getIcon(":/images/math5.png"),tr("Greek letters"), this);
-connect(greekAct, SIGNAL(triggered()), this, SLOT(ShowGreek()));
-LeftPanelToolBar->addAction(greekAct);
-connect(GreekListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(GreekListWidget);
-
-MostUsedListWidget=new SymbolListWidget(LeftPanelStackedWidget,5);
-MostUsedListWidget->setFrameStyle(QFrame::NoFrame);
-connect(MostUsedListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-usedAct = new QAction(getIcon(":/images/math6.png"),tr("Most used symbols"), this);
-connect(usedAct, SIGNAL(triggered()), this, SLOT(ShowMostUsed()));
-LeftPanelToolBar->addAction(usedAct);
-SetMostUsedSymbols();
-LeftPanelStackedWidget->addWidget(MostUsedListWidget);
-
-FavoriteListWidget=new SymbolListWidget(LeftPanelStackedWidget,6);
-FavoriteListWidget->setFrameStyle(QFrame::NoFrame);
-connect(FavoriteListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
-favAct = new QAction(getIcon(":/images/math7.png"),tr("Favorites symbols"), this);
-connect(favAct, SIGNAL(triggered()), this, SLOT(ShowFavorite()));
-LeftPanelToolBar->addAction(favAct);
-FavoriteListWidget->SetFavoritePage(favoriteSymbolList);
-connect(FavoriteListWidget->remAct, SIGNAL(triggered()), this, SLOT(RemoveFavoriteSymbols()));
-LeftPanelStackedWidget->addWidget(FavoriteListWidget);
-
-LeftPanelToolBar->addSeparator();
-
-
-leftrightWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/leftright_tags.xml");
-leftrightWidget->setFrameStyle(QFrame::NoFrame);
-connect(leftrightWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
-leftrightAct = new QAction(getIcon(":/images/leftright.png"),"left/right", this);
-connect(leftrightAct, SIGNAL(triggered()), this, SLOT(ShowLeftRight()));
-LeftPanelToolBar->addAction(leftrightAct);
-LeftPanelStackedWidget->addWidget(leftrightWidget);
-
-LeftPanelToolBar->addSeparator();
-
-usertagsListWidget=new UserTagsListWidget(LeftPanelStackedWidget);
-usertagsListWidget->setFrameStyle(QFrame::NoFrame);
-connect(usertagsListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertUserElement(QListWidgetItem*)));
-userpanelAct = new QAction(getIcon(":/images/user.png"),tr("User"), this);
-connect(userpanelAct, SIGNAL(triggered()), this, SLOT(ShowUserPanel()));
-LeftPanelToolBar->addAction(userpanelAct);
-usertagsListWidget->updateList(userTagsList);
-connect(usertagsListWidget->remAct, SIGNAL(triggered()), this, SLOT(RemoveUserTag()));
-connect(usertagsListWidget->addAct, SIGNAL(triggered()), this, SLOT(AddUserTag()));
-connect(usertagsListWidget->changeAct, SIGNAL(triggered()), this, SLOT(ChangeUserTag()));
-connect(usertagsListWidget, SIGNAL(posChanged()), this, SLOT(UpdateUserTag()));
-
-LeftPanelStackedWidget->addWidget(usertagsListWidget);
-
-LeftPanelToolBar->addSeparator();
-
-PsListWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/pstricks_tags.xml");
-PsListWidget->setFrameStyle(QFrame::NoFrame);
-connect(PsListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
-pstricksAct = new QAction(getIcon(":/images/pstricks.png"),tr("Pstricks Commands"), this);
-connect(pstricksAct, SIGNAL(triggered()), this, SLOT(ShowPstricks()));
-if (showPstricks) LeftPanelToolBar->addAction(pstricksAct);
-LeftPanelStackedWidget->addWidget(PsListWidget);
-
-MpListWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/metapost_tags.xml");
-MpListWidget->setFrameStyle(QFrame::NoFrame);
-connect(MpListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
-mpAct = new QAction(getIcon(":/images/metapost.png"),tr("MetaPost Commands"), this);
-connect(mpAct, SIGNAL(triggered()), this, SLOT(ShowMplist()));
-if (showMp) LeftPanelToolBar->addAction(mpAct);
-LeftPanelStackedWidget->addWidget(MpListWidget);
-
-tikzWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/tikz_tags.xml");
-tikzWidget->setFrameStyle(QFrame::NoFrame);
-connect(tikzWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
-tikzAct = new QAction(getIcon(":/images/tikz.png"),tr("Tikz Commands"), this);
-connect(tikzAct, SIGNAL(triggered()), this, SLOT(ShowTikz()));
-if (showTikz) LeftPanelToolBar->addAction(tikzAct);
-LeftPanelStackedWidget->addWidget(tikzWidget);
-
-asyWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/asymptote_tags.xml");
-asyWidget->setFrameStyle(QFrame::NoFrame);
-connect(asyWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
-asyAct = new QAction(getIcon(":/images/asymptote.png"),tr("Asymptote Commands"), this);
-connect(asyAct, SIGNAL(triggered()), this, SLOT(ShowAsy()));
-if (showAsy) LeftPanelToolBar->addAction(asyAct);
-LeftPanelStackedWidget->addWidget(asyWidget);
-
-
-
-
-
-viewPstricksAct = new QAction(tr("Pstricks Commands"), this);
-viewPstricksAct->setCheckable(true);
-connect(viewPstricksAct, SIGNAL(triggered()), this, SLOT(TogglePstricks()));
-viewMpAct = new QAction(tr("MetaPost Commands"), this);
-viewMpAct->setCheckable(true);
-connect(viewMpAct, SIGNAL(triggered()), this, SLOT(ToggleMetapost()));
-viewTikzAct = new QAction(tr("Tikz Commands"), this);
-viewTikzAct->setCheckable(true);
-connect(viewTikzAct, SIGNAL(triggered()), this, SLOT(ToggleTikz()));
-viewAsyAct = new QAction(tr("Asymptote Commands"), this);
-viewAsyAct->setCheckable(true);
-connect(viewAsyAct, SIGNAL(triggered()), this, SLOT(ToggleAsymptote()));
-LeftPanelToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-connect(LeftPanelToolBar, SIGNAL( customContextMenuRequested( const QPoint & )), this, SLOT( customContentsMenuStructure( const QPoint & )));
-
-LeftPanelLayout->setSpacing(0);
-LeftPanelLayout->setMargin(0);
-LeftPanelLayout->addWidget(LeftPanelToolBar);
-LeftPanelLayout->addWidget(LeftPanelStackedWidget);
-
-LeftPanelStackedWidget->setCurrentWidget(StructureTreeWidget);
-Act = new QAction(QIcon(":/images/empty.png"),"", this);
-LeftPanelToolBarBis->addAction(Act);
-Act->setEnabled(false);
-titleLeftPanel=new QLabel(tr("Structure"),LeftPanelToolBarBis);
-LeftPanelToolBarBis->addWidget(titleLeftPanel);
-
-LeftPanelLayoutBis= new QVBoxLayout(LeftPanelFrameBis);
-LeftPanelLayoutBis->setSpacing(0);
-LeftPanelLayoutBis->setMargin(0);
-LeftPanelLayoutBis->addWidget(LeftPanelToolBarBis);
-LeftPanelLayoutBis->addWidget(LeftPanelFrame);
-
-splitter3->addWidget(LeftPanelFrameBis);
-splitter3->addWidget(OpenedFilesListWidget);
-
-splitter1->addWidget(splitter3);
-splitter3->setMinimumWidth(210);
-
-Outputframe=new QFrame(this);
-Outputframe->setLineWidth(0);
-Outputframe->setFrameShape(QFrame::NoFrame);
-Outputframe->setFrameShadow(QFrame::Plain);
-
-OutputLayoutH= new QHBoxLayout(Outputframe);
-OutputLayoutH->setSpacing(0);
-OutputLayoutH->setMargin(0);
-
-logToolBar=new QToolBar("LogToolBar",Outputframe);
-logToolBar->setFloatable(false);
-logToolBar->setOrientation(Qt::Vertical);
-logToolBar->setMovable(false);
-logToolBar->setIconSize(QSize(16,16 ));
-
-QFrame *Outputframebis=new QFrame(this);
-Outputframebis->setLineWidth(0);
-Outputframebis->setFrameShape(QFrame::NoFrame);
-Outputframebis->setFrameShadow(QFrame::Plain);
-
-OutputLayoutV= new QVBoxLayout(Outputframebis);
-OutputLayoutV->setSpacing(0);
-OutputLayoutV->setMargin(0);
-
-OutputTableWidget= new QTableWidget (1,5,Outputframebis);
-OutputTableWidget->setFrameShadow(QFrame::Plain);
-OutputTableWidget->setFrameStyle(QFrame::NoFrame);
-QTableWidgetItem *HeaderItem = new QTableWidgetItem(" ");
-HeaderItem->setTextAlignment(Qt::AlignLeft);
-OutputTableWidget->setHorizontalHeaderItem(0,HeaderItem);
-HeaderItem = new QTableWidgetItem("File");
-HeaderItem->setTextAlignment(Qt::AlignLeft);
-OutputTableWidget->setHorizontalHeaderItem(1,HeaderItem);
-HeaderItem = new QTableWidgetItem("Type");
-HeaderItem->setTextAlignment(Qt::AlignLeft);
-OutputTableWidget->setHorizontalHeaderItem(2,HeaderItem);
-HeaderItem = new QTableWidgetItem("Line");
-HeaderItem->setTextAlignment(Qt::AlignLeft);
-OutputTableWidget->setHorizontalHeaderItem(3,HeaderItem);
-HeaderItem = new QTableWidgetItem("Message");
-HeaderItem->setTextAlignment(Qt::AlignLeft);
-OutputTableWidget->setHorizontalHeaderItem(4,HeaderItem);
-
-OutputTableWidget->setSelectionMode (QAbstractItemView::SingleSelection);
-QFontMetrics fm(qApp->font());
-OutputTableWidget->setColumnWidth(0,fm.width("> "));
-OutputTableWidget->setColumnWidth(1,10*fm.width("w"));
-OutputTableWidget->setColumnWidth(2,fm.width("WarningWW"));
-OutputTableWidget->setColumnWidth(3,fm.width("Line WWWWWWWW"));
-OutputTableWidget->setColumnWidth(4,20*fm.width("w"));
-connect(OutputTableWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(ClickedOnLogLine(QTableWidgetItem*)));
-OutputTableWidget->horizontalHeader()->setStretchLastSection(true);
-OutputTableWidget->setMinimumHeight(4*(fm.lineSpacing()+4));
-OutputTableWidget->verticalHeader()->hide();
-
-
-
-
-OutputTextEdit = new LogEditor(Outputframebis);
-OutputTextEdit->setFrameStyle(QFrame::NoFrame);
-OutputTextEdit->setMinimumHeight(4*(fm.lineSpacing()+4));
-connect(OutputTextEdit, SIGNAL(clickonline(int )),this,SLOT(ClickedOnOutput(int )));
-
-separatorline = new QFrame(Outputframebis);
-separatorline->setMinimumHeight(1);
-separatorline->setMaximumHeight(1);
-separatorline->setFrameShape(QFrame::Box);
-separatorline->setFrameShadow(QFrame::Plain);
-separatorline->setStyleSheet("color:black");
-
-
-OutputLayoutV->addWidget(OutputTableWidget);
-OutputLayoutV->addWidget(separatorline);
-OutputLayoutV->addWidget(OutputTextEdit);
-OutputLayoutH->addWidget(logToolBar);
-OutputLayoutH->addWidget(Outputframebis);
-OutputLayoutH->setSpacing(0);
-
-OutputTableWidget->hide();
-separatorline->hide();
-
-
-logpresent=false;
-listViewerCommands.clear();
-checkViewerInstance=false;
-
-errorFileList.clear();
-errorTypeList.clear();
-errorLineList.clear();
-errorMessageList.clear();
-errorLogList.clear();
-onlyErrorList.clear();
-errorIndex=-1;
-
-translationList.clear();
-translationList.append(QString("en"));
-
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-#ifdef USB_VERSION
-QDir transdir(QCoreApplication::applicationDirPath());
-#else
-QDir transdir(PREFIX"/share/texmaker");
-#endif
-
-#endif
-#if defined(Q_OS_MAC)
-QDir transdir(QCoreApplication::applicationDirPath() + "/../Resources");
-#endif
-#if defined(Q_OS_WIN32)
-QDir transdir(QCoreApplication::applicationDirPath());
-#endif
-foreach (QFileInfo qmFileInfo, transdir.entryInfoList(QStringList("texmaker_*.qm"),QDir::Files | QDir::Readable, QDir::Name | QDir::IgnoreCase)) 
+    QString tempDir = QDir::tempPath();
+    #if defined(Q_OS_UNIX) || defined(Q_OS_MAC)
+    #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    const QString writableDir = QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
+    if( QDir().mkpath( writableDir ) )
     {
-    QString transName = qmFileInfo.completeBaseName();
-    transName.remove("texmaker_");
-    translationList.append(transName);
+        tempDir = writableDir;
     }
-    
-scriptList.clear();    
-foreach (QFileInfo qmScriptInfo, transdir.entryInfoList(QStringList("*.tms"),QDir::Files | QDir::Readable, QDir::Name | QDir::IgnoreCase)) 
+    #else
+    const QString cacheDir = QDesktopServices::storageLocation( QDesktopServices::CacheLocation );
+    if( QDir().mkpath( cacheDir ) )
     {
-    scriptList.append(qmScriptInfo.completeBaseName());
-    }    
-    
-    
-StackedViewers=new QStackedWidget(this);
-StackedViewers->setLineWidth(0);
-StackedViewers->setFrameShape(QFrame::NoFrame);
-StackedViewers->setFrameShadow(QFrame::Plain);
-StackedViewers->setMinimumWidth(200);
-
-
-// EDITEUR
-QFrame *centralFrame=new QFrame(this);
-centralFrame->setLineWidth(0);
-centralFrame->setFrameShape(QFrame::NoFrame);
-centralFrame->setFrameShadow(QFrame::Plain);
-
-
-QFrame *centralFrameBis=new QFrame(this);
-centralFrameBis->setLineWidth(0);
-centralFrameBis->setFrameShape(QFrame::NoFrame);
-centralFrameBis->setFrameShadow(QFrame::Plain);
-
-centralToolBarBis=new QToolBar("FileBar",centralFrameBis);
-centralToolBarBis->setFloatable(false);
-centralToolBarBis->setOrientation(Qt::Horizontal);
-centralToolBarBis->setMovable(false);
-centralToolBarBis->setIconSize(QSize(16,16 ));
-centralToolBarBis->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-
-LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
-LeftPanelToolBarBis->setMaximumHeight(centralToolBarBis->height());
-
-ToggleDocAct=new QAction(getIcon(":/images/toggle.png"),tr("Toggle between the master document and the current document")+" (CTRL+SHIFT+F2)", this);
-ToggleDocAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_F2);
-connect(ToggleDocAct, SIGNAL(triggered()), this, SLOT(ToggleMasterCurrent()));
-centralToolBarBis->addAction(ToggleDocAct);
-
-Act = new QAction(getIcon(":/images/errorprev.png"),tr("Previous Document"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(gotoPrevDocument()));
-centralToolBarBis->addAction(Act);
-Act = new QAction(getIcon(":/images/errornext.png"),tr("Next Document"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(gotoNextDocument()));
-centralToolBarBis->addAction(Act);
-
-
-comboFiles=new QComboBox(centralToolBarBis);
-comboFiles->setMaximumWidth(300);
-comboFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-comboFiles->setMinimumContentsLength(20);
-comboFiles->setMaxVisibleItems(40);
-comboFiles->setContextMenuPolicy(Qt::CustomContextMenu);
-connect(comboFiles, SIGNAL(activated(int)), this, SLOT(listSelectionActivated(int)));
-centralToolBarBis->addWidget(comboFiles);
-QWidget* spacer = new QWidget();
-spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-centralToolBarBis->addWidget(spacer);
-Act = new QAction(getIcon(":/images/fileclose.png"), tr("Close"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(fileClose()));
-centralToolBarBis->addAction(Act);
-centralToolBarBis->addSeparator();
-posLabel=new QLabel("L: C: ",centralToolBarBis);
-posLabel->setFixedWidth(fm.width("L:99999 C:99999"));
-centralToolBarBis->addWidget(posLabel);
-centralToolBarBis->addSeparator();
-Act = new QAction(getIcon(":/images/bookmark1.png"),tr("Click to jump to the bookmark"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark1()));
-centralToolBarBis->addAction(Act);
-Act = new QAction(getIcon(":/images/bookmark2.png"),tr("Click to jump to the bookmark"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark2()));
-centralToolBarBis->addAction(Act);
-Act = new QAction(getIcon(":/images/bookmark3.png"),tr("Click to jump to the bookmark"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark3()));
-centralToolBarBis->addAction(Act);
-
-EditorView = new QStackedWidget( centralFrame );
-EditorView->setAutoFillBackground( true );
-EditorView->setBackgroundRole( QPalette::Dark );
-
-connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateCaption()) );
-connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
-
-CentralLayout= new QHBoxLayout(centralFrame);
-CentralLayout->setSpacing(0);
-CentralLayout->setMargin(0);
-CentralLayout->addWidget(EditorView);
-
-CentralLayoutBis= new QVBoxLayout(centralFrameBis);
-CentralLayoutBis->setSpacing(0);
-CentralLayoutBis->setMargin(0);
-CentralLayoutBis->addWidget(centralToolBarBis);
-CentralLayoutBis->addWidget(centralFrame);
-
-
-splitter2->addWidget(centralFrameBis);
-splitter2->addWidget(Outputframe);
-connect(splitter2,SIGNAL(splitterMoved(int,int)), this, SLOT(splitter2Changed()));
-splitter1->addWidget(splitter2);
-splitter1->addWidget(StackedViewers);
-setCentralWidget(splitter1);
-
-splitter2->show();
-splitter3->show();
-splitter1->show();
-
-
-
-QList<int> sizes;
-sizes << height()-200 << 200;
-splitter2->setSizes( sizes );
-sizes.clear();
-sizes << 180 << (int) (width()-180)*0.5 << (int) (width()-180)*0.5;
-splitter1->setSizes( sizes );
-sizes.clear();
-sizes << height()-50 << 50;
-splitter3->setSizes( sizes );
-
-
-
-
-createStatusBar();
-setupMenus();
-setupToolBars();
-
-
-
-connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardDataChanged()));
-
-QPalette pal = QApplication::palette();
-QColor col=pal.color(QPalette::Window);
-
-if (new_gui) 
-{
-restoreState(windowstate, 0);
-if (winmaximized) this->setWindowState(Qt::WindowMaximized);
-splitter1->restoreState(splitter1state);
-splitter2->restoreState(splitter2state);
-splitter3->restoreState(splitter3state);
+        tempDir = cacheDir;
+    }
+    #endif
+    #endif
+    return tempDir;
 }
 
 
-
-ShowOutputView(false);
-ShowStructView(false);
-ShowFilesView(false);
-
-sourceviewerWidget=new SourceView(StackedViewers,EditorFont,showline,edcolors(),hicolors());
-sourceviewerWidget->editor->setEncoding(input_encoding);
-if (wordwrap) {sourceviewerWidget->editor->setWordWrapMode(QTextOption::WordWrap);}
-else {sourceviewerWidget->editor->setWordWrapMode(QTextOption::NoWrap);}
-connect (sourceviewerWidget, SIGNAL(showDiff()), this, SLOT(compareDocuments()));
-StackedViewers->addWidget(sourceviewerWidget);
-
-ShowPdfView(false);
-ShowSourceView(false);
-
-if (embedinternalpdf && builtinpdfview && showpdfview ) 
-  {
-  StackedViewers->show();
-  sourceviewerWidget->hide();
-  }
-else if (showsourceview)
-  {
-  StackedViewers->setCurrentWidget(sourceviewerWidget);
-  StackedViewers->show();
-  }
-else StackedViewers->hide();
-
-UpdateRecentFile();
-
-UpdateCaption();
-singlemode=true;
-ToggleDocAct->setEnabled(false);
-MasterName=getName();
-
-show();
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
-#if defined(Q_OS_MAC)
-MacSupport::addFullscreen(this);
-#endif
-#endif
-splitter2Changed();
+static QString temporarySessionFile()
+{
+    QString prefixFile = QString( QUrl::toPercentEncoding( "tks_temp_" + QDir::homePath().section( '/', -1 ) ) );
+    return temporaryDirectory() + "/" + prefixFile.remove( "%" ) + ".tks";
+}
 
 
-
-LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
-stat1->setText(QString(" %1 ").arg(tr("Normal Mode")));
-stat3->setText(QString(" %1 ").arg(input_encoding));
-
-setAcceptDrops(true);
-autosaveTimer = new QTimer(this);
-if (autosave)
+Texmaker::Texmaker( QWidget* const parent )
+    : QMainWindow( parent )
+{
+    eraseSettings = false;
+    replaceSettings = false;
+    ReadSettings();
+    
+    sessionTempFile = temporarySessionFile();
+    
+     if (spelldicExist()) 
+           {
+           QString dic=spell_dic.left(spell_dic.length()-4);
+           spellChecker = new Hunspell(dic.toLatin1()+".aff",dic.toLatin1()+".dic");
+           }
+     else spellChecker=0;
+    
+    untitled_id=1;
+    
+    
+    #if defined(Q_OS_MAC)
+    setWindowIcon(QIcon(":/images/logo128.png"));
+    #else
+    setWindowIcon(getIcon(":/images/appicon.png"));
+    #endif
+    QApplication::setOrganizationName("Xm1");
+    QApplication::setApplicationName("Texmaker"); 
+    
+    setIconSize(QSize(22,22 ));
+     
+    completer = new QCompleter(this);
+    initCompleter();
+    
+    
+    QAction *Act;
+    splitter1=new MiniSplitter(this);
+    splitter1->setOrientation(Qt::Horizontal);
+    splitter2=new MiniSplitter(splitter1);
+    splitter2->setOrientation(Qt::Vertical);
+    // PANNEAU STRUCTURE
+    
+    LeftPanelFrameBis=new QFrame(this);
+    LeftPanelFrameBis->setLineWidth(0);
+    LeftPanelFrameBis->setFrameShape(QFrame::NoFrame);
+    LeftPanelFrameBis->setFrameShadow(QFrame::Plain);
+    
+    
+    
+    LeftPanelToolBarBis=new QToolBar("TitleBar",LeftPanelFrameBis);
+    LeftPanelToolBarBis->setFloatable(false);
+    LeftPanelToolBarBis->setOrientation(Qt::Horizontal);
+    LeftPanelToolBarBis->setMovable(false);
+    LeftPanelToolBarBis->setIconSize(QSize(16,16 ));
+    LeftPanelToolBarBis->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    
+    QFrame *LeftPanelFrame=new QFrame(this);
+    LeftPanelFrame->setLineWidth(0);
+    LeftPanelFrame->setFrameShape(QFrame::NoFrame);
+    LeftPanelFrame->setFrameShadow(QFrame::Plain);
+    
+    splitter3=new MiniSplitter(splitter1);
+    splitter3->setOrientation(Qt::Vertical);
+    
+    LeftPanelLayout= new QHBoxLayout(LeftPanelFrame);
+    LeftPanelToolBar=new QToolBar("LogToolBar",LeftPanelFrame);
+    LeftPanelToolBar->setFloatable(false);
+    LeftPanelToolBar->setOrientation(Qt::Vertical);
+    LeftPanelToolBar->setMovable(false);
+    LeftPanelToolBar->setIconSize(QSize(16,16 ));
+    
+    
+    LeftPanelStackedWidget=new QStackedWidget(LeftPanelFrame);
+    
+    
+    
+    StructureTreeWidget=new QTreeWidget(LeftPanelStackedWidget);
+    StructureTreeWidget->setFrameStyle(QFrame::NoFrame);
+    StructureTreeWidget->setColumnCount(1);
+    StructureTreeWidget->header()->hide();
+    StructureTreeWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    StructureTreeWidget->header()->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+    #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+    StructureTreeWidget->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    #else
+    StructureTreeWidget->header()->setResizeMode(0, QHeaderView::ResizeToContents);
+    #endif
+    StructureTreeWidget->header()->setStretchLastSection(false);
+    
+    connect( StructureTreeWidget, SIGNAL(itemClicked(QTreeWidgetItem *,int )), SLOT(ClickedOnStructure(QTreeWidgetItem *,int)));
+    
+    connect(LeftPanelToolBar->addAction(getIcon(":/images/structure.png"),tr("Structure")), SIGNAL(triggered()), this, SLOT(ShowStructure()));
+    LeftPanelStackedWidget->addWidget(StructureTreeWidget);
+    
+    OpenedFilesListWidget=new QListWidget(LeftPanelFrame);
+    OpenedFilesListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(OpenedFilesListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(OpenedFileActivated(QListWidgetItem*)));
+    
+    
+    LeftPanelToolBar->addSeparator();
+    
+    
+    RelationListWidget=new SymbolListWidget(LeftPanelStackedWidget,0);
+    RelationListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(RelationListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    relationAct = new QAction(getIcon(":/images/math1.png"),tr("Relation symbols"), this);
+    connect(relationAct, SIGNAL(triggered()), this, SLOT(ShowRelation()));
+    LeftPanelToolBar->addAction(relationAct);
+    connect(RelationListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(RelationListWidget);
+    
+    
+    ArrowListWidget=new SymbolListWidget(LeftPanelStackedWidget,1);
+    ArrowListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(ArrowListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    arrowAct = new QAction(getIcon(":/images/math2.png"),tr("Arrow symbols"), this);
+    connect(arrowAct, SIGNAL(triggered()), this, SLOT(ShowArrow()));
+    LeftPanelToolBar->addAction(arrowAct);
+    connect(ArrowListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(ArrowListWidget);
+    
+    MiscellaneousListWidget=new SymbolListWidget(LeftPanelStackedWidget,2);
+    MiscellaneousListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(MiscellaneousListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    miscAct = new QAction(getIcon(":/images/math3.png"),tr("Miscellaneous symbols"), this);
+    connect(miscAct, SIGNAL(triggered()), this, SLOT(ShowMisc()));
+    LeftPanelToolBar->addAction(miscAct);
+    connect(MiscellaneousListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(MiscellaneousListWidget);
+    
+    DelimitersListWidget=new SymbolListWidget(LeftPanelStackedWidget,3);
+    DelimitersListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(DelimitersListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    delimAct = new QAction(getIcon(":/images/math4.png"),tr("Delimiters"), this);
+    connect(delimAct, SIGNAL(triggered()), this, SLOT(ShowDelim()));
+    LeftPanelToolBar->addAction(delimAct);
+    connect(DelimitersListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(DelimitersListWidget);
+    
+    GreekListWidget=new SymbolListWidget(LeftPanelStackedWidget,4);
+    GreekListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(GreekListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    greekAct = new QAction(getIcon(":/images/math5.png"),tr("Greek letters"), this);
+    connect(greekAct, SIGNAL(triggered()), this, SLOT(ShowGreek()));
+    LeftPanelToolBar->addAction(greekAct);
+    connect(GreekListWidget->addAct, SIGNAL(triggered()), this, SLOT(InsertFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(GreekListWidget);
+    
+    MostUsedListWidget=new SymbolListWidget(LeftPanelStackedWidget,5);
+    MostUsedListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(MostUsedListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    usedAct = new QAction(getIcon(":/images/math6.png"),tr("Most used symbols"), this);
+    connect(usedAct, SIGNAL(triggered()), this, SLOT(ShowMostUsed()));
+    LeftPanelToolBar->addAction(usedAct);
+    SetMostUsedSymbols();
+    LeftPanelStackedWidget->addWidget(MostUsedListWidget);
+    
+    FavoriteListWidget=new SymbolListWidget(LeftPanelStackedWidget,6);
+    FavoriteListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(FavoriteListWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(InsertSymbol(QTableWidgetItem*)));
+    favAct = new QAction(getIcon(":/images/math7.png"),tr("Favorites symbols"), this);
+    connect(favAct, SIGNAL(triggered()), this, SLOT(ShowFavorite()));
+    LeftPanelToolBar->addAction(favAct);
+    FavoriteListWidget->SetFavoritePage(favoriteSymbolList);
+    connect(FavoriteListWidget->remAct, SIGNAL(triggered()), this, SLOT(RemoveFavoriteSymbols()));
+    LeftPanelStackedWidget->addWidget(FavoriteListWidget);
+    
+    LeftPanelToolBar->addSeparator();
+    
+    
+    leftrightWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/leftright_tags.xml");
+    leftrightWidget->setFrameStyle(QFrame::NoFrame);
+    connect(leftrightWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
+    leftrightAct = new QAction(getIcon(":/images/leftright.png"),"left/right", this);
+    connect(leftrightAct, SIGNAL(triggered()), this, SLOT(ShowLeftRight()));
+    LeftPanelToolBar->addAction(leftrightAct);
+    LeftPanelStackedWidget->addWidget(leftrightWidget);
+    
+    LeftPanelToolBar->addSeparator();
+    
+    usertagsListWidget=new UserTagsListWidget(LeftPanelStackedWidget);
+    usertagsListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(usertagsListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertUserElement(QListWidgetItem*)));
+    userpanelAct = new QAction(getIcon(":/images/user.png"),tr("User"), this);
+    connect(userpanelAct, SIGNAL(triggered()), this, SLOT(ShowUserPanel()));
+    LeftPanelToolBar->addAction(userpanelAct);
+    usertagsListWidget->updateList(userTagsList);
+    connect(usertagsListWidget->remAct, SIGNAL(triggered()), this, SLOT(RemoveUserTag()));
+    connect(usertagsListWidget->addAct, SIGNAL(triggered()), this, SLOT(AddUserTag()));
+    connect(usertagsListWidget->changeAct, SIGNAL(triggered()), this, SLOT(ChangeUserTag()));
+    connect(usertagsListWidget, SIGNAL(posChanged()), this, SLOT(UpdateUserTag()));
+    
+    LeftPanelStackedWidget->addWidget(usertagsListWidget);
+    
+    LeftPanelToolBar->addSeparator();
+    
+    PsListWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/pstricks_tags.xml");
+    PsListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(PsListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
+    pstricksAct = new QAction(getIcon(":/images/pstricks.png"),tr("Pstricks Commands"), this);
+    connect(pstricksAct, SIGNAL(triggered()), this, SLOT(ShowPstricks()));
+    if (showPstricks) LeftPanelToolBar->addAction(pstricksAct);
+    LeftPanelStackedWidget->addWidget(PsListWidget);
+    
+    MpListWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/metapost_tags.xml");
+    MpListWidget->setFrameStyle(QFrame::NoFrame);
+    connect(MpListWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
+    mpAct = new QAction(getIcon(":/images/metapost.png"),tr("MetaPost Commands"), this);
+    connect(mpAct, SIGNAL(triggered()), this, SLOT(ShowMplist()));
+    if (showMp) LeftPanelToolBar->addAction(mpAct);
+    LeftPanelStackedWidget->addWidget(MpListWidget);
+    
+    tikzWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/tikz_tags.xml");
+    tikzWidget->setFrameStyle(QFrame::NoFrame);
+    connect(tikzWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
+    tikzAct = new QAction(getIcon(":/images/tikz.png"),tr("Tikz Commands"), this);
+    connect(tikzAct, SIGNAL(triggered()), this, SLOT(ShowTikz()));
+    if (showTikz) LeftPanelToolBar->addAction(tikzAct);
+    LeftPanelStackedWidget->addWidget(tikzWidget);
+    
+    asyWidget=new XmlTagsListWidget(LeftPanelStackedWidget,":/tags/asymptote_tags.xml");
+    asyWidget->setFrameStyle(QFrame::NoFrame);
+    connect(asyWidget, SIGNAL(itemClicked ( QListWidgetItem*)), this, SLOT(InsertXmlTag(QListWidgetItem*)));
+    asyAct = new QAction(getIcon(":/images/asymptote.png"),tr("Asymptote Commands"), this);
+    connect(asyAct, SIGNAL(triggered()), this, SLOT(ShowAsy()));
+    if (showAsy) LeftPanelToolBar->addAction(asyAct);
+    LeftPanelStackedWidget->addWidget(asyWidget);
+    
+    
+    
+    
+    
+    viewPstricksAct = new QAction(tr("Pstricks Commands"), this);
+    viewPstricksAct->setCheckable(true);
+    connect(viewPstricksAct, SIGNAL(triggered()), this, SLOT(TogglePstricks()));
+    viewMpAct = new QAction(tr("MetaPost Commands"), this);
+    viewMpAct->setCheckable(true);
+    connect(viewMpAct, SIGNAL(triggered()), this, SLOT(ToggleMetapost()));
+    viewTikzAct = new QAction(tr("Tikz Commands"), this);
+    viewTikzAct->setCheckable(true);
+    connect(viewTikzAct, SIGNAL(triggered()), this, SLOT(ToggleTikz()));
+    viewAsyAct = new QAction(tr("Asymptote Commands"), this);
+    viewAsyAct->setCheckable(true);
+    connect(viewAsyAct, SIGNAL(triggered()), this, SLOT(ToggleAsymptote()));
+    LeftPanelToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(LeftPanelToolBar, SIGNAL( customContextMenuRequested( const QPoint & )), this, SLOT( customContentsMenuStructure( const QPoint & )));
+    
+    LeftPanelLayout->setSpacing(0);
+    LeftPanelLayout->setMargin(0);
+    LeftPanelLayout->addWidget(LeftPanelToolBar);
+    LeftPanelLayout->addWidget(LeftPanelStackedWidget);
+    
+    LeftPanelStackedWidget->setCurrentWidget(StructureTreeWidget);
+    Act = new QAction(QIcon(":/images/empty.png"),"", this);
+    LeftPanelToolBarBis->addAction(Act);
+    Act->setEnabled(false);
+    titleLeftPanel=new QLabel(tr("Structure"),LeftPanelToolBarBis);
+    LeftPanelToolBarBis->addWidget(titleLeftPanel);
+    
+    LeftPanelLayoutBis= new QVBoxLayout(LeftPanelFrameBis);
+    LeftPanelLayoutBis->setSpacing(0);
+    LeftPanelLayoutBis->setMargin(0);
+    LeftPanelLayoutBis->addWidget(LeftPanelToolBarBis);
+    LeftPanelLayoutBis->addWidget(LeftPanelFrame);
+    
+    splitter3->addWidget(LeftPanelFrameBis);
+    splitter3->addWidget(OpenedFilesListWidget);
+    
+    splitter1->addWidget(splitter3);
+    splitter3->setMinimumWidth(210);
+    
+    Outputframe=new QFrame(this);
+    Outputframe->setLineWidth(0);
+    Outputframe->setFrameShape(QFrame::NoFrame);
+    Outputframe->setFrameShadow(QFrame::Plain);
+    
+    OutputLayoutH= new QHBoxLayout(Outputframe);
+    OutputLayoutH->setSpacing(0);
+    OutputLayoutH->setMargin(0);
+    
+    logToolBar=new QToolBar("LogToolBar",Outputframe);
+    logToolBar->setFloatable(false);
+    logToolBar->setOrientation(Qt::Vertical);
+    logToolBar->setMovable(false);
+    logToolBar->setIconSize(QSize(16,16 ));
+    
+    QFrame *Outputframebis=new QFrame(this);
+    Outputframebis->setLineWidth(0);
+    Outputframebis->setFrameShape(QFrame::NoFrame);
+    Outputframebis->setFrameShadow(QFrame::Plain);
+    
+    OutputLayoutV= new QVBoxLayout(Outputframebis);
+    OutputLayoutV->setSpacing(0);
+    OutputLayoutV->setMargin(0);
+    
+    OutputTableWidget= new QTableWidget (1,5,Outputframebis);
+    OutputTableWidget->setFrameShadow(QFrame::Plain);
+    OutputTableWidget->setFrameStyle(QFrame::NoFrame);
+    QTableWidgetItem *HeaderItem = new QTableWidgetItem(" ");
+    HeaderItem->setTextAlignment(Qt::AlignLeft);
+    OutputTableWidget->setHorizontalHeaderItem(0,HeaderItem);
+    HeaderItem = new QTableWidgetItem("File");
+    HeaderItem->setTextAlignment(Qt::AlignLeft);
+    OutputTableWidget->setHorizontalHeaderItem(1,HeaderItem);
+    HeaderItem = new QTableWidgetItem("Type");
+    HeaderItem->setTextAlignment(Qt::AlignLeft);
+    OutputTableWidget->setHorizontalHeaderItem(2,HeaderItem);
+    HeaderItem = new QTableWidgetItem("Line");
+    HeaderItem->setTextAlignment(Qt::AlignLeft);
+    OutputTableWidget->setHorizontalHeaderItem(3,HeaderItem);
+    HeaderItem = new QTableWidgetItem("Message");
+    HeaderItem->setTextAlignment(Qt::AlignLeft);
+    OutputTableWidget->setHorizontalHeaderItem(4,HeaderItem);
+    
+    OutputTableWidget->setSelectionMode (QAbstractItemView::SingleSelection);
+    QFontMetrics fm(qApp->font());
+    OutputTableWidget->setColumnWidth(0,fm.width("> "));
+    OutputTableWidget->setColumnWidth(1,10*fm.width("w"));
+    OutputTableWidget->setColumnWidth(2,fm.width("WarningWW"));
+    OutputTableWidget->setColumnWidth(3,fm.width("Line WWWWWWWW"));
+    OutputTableWidget->setColumnWidth(4,20*fm.width("w"));
+    connect(OutputTableWidget, SIGNAL(itemClicked ( QTableWidgetItem*)), this, SLOT(ClickedOnLogLine(QTableWidgetItem*)));
+    OutputTableWidget->horizontalHeader()->setStretchLastSection(true);
+    OutputTableWidget->setMinimumHeight(4*(fm.lineSpacing()+4));
+    OutputTableWidget->verticalHeader()->hide();
+    
+    
+    
+    
+    OutputTextEdit = new LogEditor(Outputframebis);
+    OutputTextEdit->setFrameStyle(QFrame::NoFrame);
+    OutputTextEdit->setMinimumHeight(4*(fm.lineSpacing()+4));
+    connect(OutputTextEdit, SIGNAL(clickonline(int )),this,SLOT(ClickedOnOutput(int )));
+    
+    separatorline = new QFrame(Outputframebis);
+    separatorline->setMinimumHeight(1);
+    separatorline->setMaximumHeight(1);
+    separatorline->setFrameShape(QFrame::Box);
+    separatorline->setFrameShadow(QFrame::Plain);
+    separatorline->setStyleSheet("color:black");
+    
+    
+    OutputLayoutV->addWidget(OutputTableWidget);
+    OutputLayoutV->addWidget(separatorline);
+    OutputLayoutV->addWidget(OutputTextEdit);
+    OutputLayoutH->addWidget(logToolBar);
+    OutputLayoutH->addWidget(Outputframebis);
+    OutputLayoutH->setSpacing(0);
+    
+    OutputTableWidget->hide();
+    separatorline->hide();
+    
+    
+    logpresent=false;
+    listViewerCommands.clear();
+    checkViewerInstance=false;
+    
+    errorFileList.clear();
+    errorTypeList.clear();
+    errorLineList.clear();
+    errorMessageList.clear();
+    errorLogList.clear();
+    onlyErrorList.clear();
+    errorIndex=-1;
+    
+    translationList.clear();
+    translationList.append(QString("en"));
+    
+    #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+    #ifdef USB_VERSION
+    QDir transdir(QCoreApplication::applicationDirPath());
+    #else
+    QDir transdir(PREFIX"/share/texmaker");
+    #endif
+    
+    #endif
+    #if defined(Q_OS_MAC)
+    QDir transdir(QCoreApplication::applicationDirPath() + "/../Resources");
+    #endif
+    #if defined(Q_OS_WIN32)
+    QDir transdir(QCoreApplication::applicationDirPath());
+    #endif
+    foreach (QFileInfo qmFileInfo, transdir.entryInfoList(QStringList("texmaker_*.qm"),QDir::Files | QDir::Readable, QDir::Name | QDir::IgnoreCase)) 
+        {
+        QString transName = qmFileInfo.completeBaseName();
+        transName.remove("texmaker_");
+        translationList.append(transName);
+        }
+        
+    scriptList.clear();    
+    foreach (QFileInfo qmScriptInfo, transdir.entryInfoList(QStringList("*.tms"),QDir::Files | QDir::Readable, QDir::Name | QDir::IgnoreCase)) 
+        {
+        scriptList.append(qmScriptInfo.completeBaseName());
+        }    
+        
+        
+    StackedViewers=new QStackedWidget(this);
+    StackedViewers->setLineWidth(0);
+    StackedViewers->setFrameShape(QFrame::NoFrame);
+    StackedViewers->setFrameShadow(QFrame::Plain);
+    StackedViewers->setMinimumWidth(200);
+    
+    
+    // EDITEUR
+    QFrame *centralFrame=new QFrame(this);
+    centralFrame->setLineWidth(0);
+    centralFrame->setFrameShape(QFrame::NoFrame);
+    centralFrame->setFrameShadow(QFrame::Plain);
+    
+    
+    QFrame *centralFrameBis=new QFrame(this);
+    centralFrameBis->setLineWidth(0);
+    centralFrameBis->setFrameShape(QFrame::NoFrame);
+    centralFrameBis->setFrameShadow(QFrame::Plain);
+    
+    centralToolBarBis=new QToolBar("FileBar",centralFrameBis);
+    centralToolBarBis->setFloatable(false);
+    centralToolBarBis->setOrientation(Qt::Horizontal);
+    centralToolBarBis->setMovable(false);
+    centralToolBarBis->setIconSize(QSize(16,16 ));
+    centralToolBarBis->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    
+    LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
+    LeftPanelToolBarBis->setMaximumHeight(centralToolBarBis->height());
+    
+    ToggleDocAct=new QAction(getIcon(":/images/toggle.png"),tr("Toggle between the master document and the current document")+" (CTRL+SHIFT+F2)", this);
+    ToggleDocAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_F2);
+    connect(ToggleDocAct, SIGNAL(triggered()), this, SLOT(ToggleMasterCurrent()));
+    centralToolBarBis->addAction(ToggleDocAct);
+    
+    Act = new QAction(getIcon(":/images/errorprev.png"),tr("Previous Document"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(gotoPrevDocument()));
+    centralToolBarBis->addAction(Act);
+    Act = new QAction(getIcon(":/images/errornext.png"),tr("Next Document"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(gotoNextDocument()));
+    centralToolBarBis->addAction(Act);
+    
+    
+    comboFiles=new QComboBox(centralToolBarBis);
+    comboFiles->setMaximumWidth(300);
+    comboFiles->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    comboFiles->setMinimumContentsLength(20);
+    comboFiles->setMaxVisibleItems(40);
+    comboFiles->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(comboFiles, SIGNAL(activated(int)), this, SLOT(listSelectionActivated(int)));
+    centralToolBarBis->addWidget(comboFiles);
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    centralToolBarBis->addWidget(spacer);
+    Act = new QAction(getIcon(":/images/fileclose.png"), tr("Close"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(fileClose()));
+    centralToolBarBis->addAction(Act);
+    centralToolBarBis->addSeparator();
+    posLabel=new QLabel("L: C: ",centralToolBarBis);
+    posLabel->setFixedWidth(fm.width("L:99999 C:99999"));
+    centralToolBarBis->addWidget(posLabel);
+    centralToolBarBis->addSeparator();
+    Act = new QAction(getIcon(":/images/bookmark1.png"),tr("Click to jump to the bookmark"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark1()));
+    centralToolBarBis->addAction(Act);
+    Act = new QAction(getIcon(":/images/bookmark2.png"),tr("Click to jump to the bookmark"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark2()));
+    centralToolBarBis->addAction(Act);
+    Act = new QAction(getIcon(":/images/bookmark3.png"),tr("Click to jump to the bookmark"), this);
+    connect(Act, SIGNAL(triggered()), this, SLOT(gotoBookmark3()));
+    centralToolBarBis->addAction(Act);
+    
+    EditorView = new QStackedWidget( centralFrame );
+    EditorView->setAutoFillBackground( true );
+    EditorView->setBackgroundRole( QPalette::Dark );
+    
+    connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateCaption()) );
+    connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
+    
+    CentralLayout= new QHBoxLayout(centralFrame);
+    CentralLayout->setSpacing(0);
+    CentralLayout->setMargin(0);
+    CentralLayout->addWidget(EditorView);
+    
+    CentralLayoutBis= new QVBoxLayout(centralFrameBis);
+    CentralLayoutBis->setSpacing(0);
+    CentralLayoutBis->setMargin(0);
+    CentralLayoutBis->addWidget(centralToolBarBis);
+    CentralLayoutBis->addWidget(centralFrame);
+    
+    
+    splitter2->addWidget(centralFrameBis);
+    splitter2->addWidget(Outputframe);
+    connect(splitter2,SIGNAL(splitterMoved(int,int)), this, SLOT(splitter2Changed()));
+    splitter1->addWidget(splitter2);
+    splitter1->addWidget(StackedViewers);
+    setCentralWidget(splitter1);
+    
+    splitter2->show();
+    splitter3->show();
+    splitter1->show();
+    
+    
+    
+    QList<int> sizes;
+    sizes << height()-200 << 200;
+    splitter2->setSizes( sizes );
+    sizes.clear();
+    sizes << 180 << (int) (width()-180)*0.5 << (int) (width()-180)*0.5;
+    splitter1->setSizes( sizes );
+    sizes.clear();
+    sizes << height()-50 << 50;
+    splitter3->setSizes( sizes );
+    
+    
+    
+    
+    createStatusBar();
+    setupMenus();
+    setupToolBars();
+    
+    
+    
+    connect(QApplication::clipboard(), SIGNAL(dataChanged()), this, SLOT(clipboardDataChanged()));
+    
+    QPalette pal = QApplication::palette();
+    QColor col=pal.color(QPalette::Window);
+    
+    if (new_gui) 
     {
-    connect(autosaveTimer, SIGNAL(timeout()), this, SLOT(fileBackupAll()));
-    autosaveTimer->start(600000);
+    restoreState(windowstate, 0);
+    if (winmaximized) this->setWindowState(Qt::WindowMaximized);
+    splitter1->restoreState(splitter1state);
+    splitter2->restoreState(splitter2state);
+    splitter3->restoreState(splitter3state);
     }
-
+    
+    
+    
+    ShowOutputView(false);
+    ShowStructView(false);
+    ShowFilesView(false);
+    
+    sourceviewerWidget=new SourceView(StackedViewers,EditorFont,showline,edcolors(),hicolors());
+    sourceviewerWidget->editor->setEncoding(input_encoding);
+    if (wordwrap) {sourceviewerWidget->editor->setWordWrapMode(QTextOption::WordWrap);}
+    else {sourceviewerWidget->editor->setWordWrapMode(QTextOption::NoWrap);}
+    connect (sourceviewerWidget, SIGNAL(showDiff()), this, SLOT(compareDocuments()));
+    StackedViewers->addWidget(sourceviewerWidget);
+    
+    ShowPdfView(false);
+    ShowSourceView(false);
+    
+    if (embedinternalpdf && builtinpdfview && showpdfview ) 
+      {
+      StackedViewers->show();
+      sourceviewerWidget->hide();
+      }
+    else if (showsourceview)
+      {
+      StackedViewers->setCurrentWidget(sourceviewerWidget);
+      StackedViewers->show();
+      }
+    else StackedViewers->hide();
+    
+    UpdateRecentFile();
+    
+    UpdateCaption();
+    singlemode=true;
+    ToggleDocAct->setEnabled(false);
+    MasterName=getName();
+    
+    show();
+    #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+    #if defined(Q_OS_MAC)
+    MacSupport::addFullscreen(this);
+    #endif
+    #endif
+    splitter2Changed();
+    
+    
+    
+    LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
+    stat1->setText(QString(" %1 ").arg(tr("Normal Mode")));
+    stat3->setText(QString(" %1 ").arg(input_encoding));
+    
+    setAcceptDrops(true);
+    autosaveTimer = new QTimer(this);
+    if (autosave)
+        {
+        connect(autosaveTimer, SIGNAL(timeout()), this, SLOT(fileBackupAll()));
+        autosaveTimer->start(600000);
+        }
 }
 
 Texmaker::~Texmaker(){

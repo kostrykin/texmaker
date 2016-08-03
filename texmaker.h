@@ -57,19 +57,21 @@
 #include "scandialog.h"
 
 
-
-typedef  QMap<LatexEditorView*, QString> FilesMap;
-typedef  QMap<QString,QString> KeysMap;
-typedef  QString Userlist[10];
-typedef  QString UserCd[5];
+typedef QMap<LatexEditorView*, QString> FilesMap;
+typedef QMap<QString,QString> KeysMap;
+typedef QString Userlist[10];
+typedef QString UserCd[5];
 typedef int SymbolList[412];
+
 
 class Texmaker : public QMainWindow
 {
+
     Q_OBJECT
 
 public:
-    Texmaker(QWidget *parent = 0);
+
+    Texmaker( QWidget* const parent = 0 );
     ~Texmaker();
 QString getName();
 QFont EditorFont;
