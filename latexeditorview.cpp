@@ -50,8 +50,8 @@ LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, boo
     const QFontMetrics fm( efont );
     this->lineNumberPalette.setColor( QPalette::Window, edcolors.at( 1 ) );
 
-    editor = new LatexEditor( frame, efont, edcolors, hicolors, inlinespelling, ignoredWords, spellChecker, tabspaces, tabwidth, viewfocus, name, ulist );
-    lineNumberWidget = new LineNumberWidget( editor, frame, svn );
+    myEditor = new LatexEditor( frame, efont, edcolors, hicolors, inlinespelling, ignoredWords, spellChecker, tabspaces, tabwidth, viewfocus, name, ulist );
+    lineNumberWidget = new LineNumberWidget( myEditor, frame, svn );
     lineNumberWidget->setFont( efont );
     lineNumberWidget->setPalette( this->lineNumberPalette );
     lineNumberWidget->setAutoFillBackground( true );
@@ -62,8 +62,8 @@ LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, boo
     lay->setSpacing( 0 );
     lay->setMargin( 0 );
     lay->addWidget( lineNumberWidget );
-    lay->addWidget( editor );
-    setFocusProxy( editor );
+    lay->addWidget( myEditor );
+    setFocusProxy( myEditor );
     setLineNumberWidgetVisible( line );
     
     Stack->setLineWidth( 0 );
@@ -71,19 +71,19 @@ LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, boo
     Stack->setFrameShadow( QFrame::Plain );
     
     Stack->addWidget( findwidget );
-    findwidget->SetEditor( editor );
+    findwidget->SetEditor( myEditor );
     connect( findwidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
     connect( findwidget, SIGNAL( requestExtension() ), this, SLOT( updateFind() ) );
     
     Stack->addWidget( replacewidget );
-    replacewidget->SetEditor( editor );
+    replacewidget->SetEditor( myEditor );
     connect( replacewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
     connect( replacewidget, SIGNAL( requestExtension() ), this, SLOT( updateReplace() ) );
     
-    connect( editor, SIGNAL( textChanged() ), this, SLOT( updateInSelection() ) );
+    connect( myEditor, SIGNAL( textChanged() ), this, SLOT( updateInSelection() ) );
     
     Stack->addWidget( gotolinewidget );
-    gotolinewidget->SetEditor( editor );
+    gotolinewidget->SetEditor( myEditor );
     connect( gotolinewidget, SIGNAL( requestHide() ), Stack, SLOT( hide() ) );
     
     Stack->hide();
@@ -102,6 +102,18 @@ LatexEditorView::~LatexEditorView()
 }
 
 
+LatexEditor& LatexEditorView::editor()
+{
+    return *myEditor;
+}
+
+
+const LatexEditor& LatexEditorView::editor() const
+{
+    return *myEditor;
+}
+
+
 void LatexEditorView::setLineNumberWidgetVisible( bool b )
 {
     if( b )
@@ -116,7 +128,7 @@ void LatexEditorView::setLineNumberWidgetVisible( bool b )
 
 void LatexEditorView::changeSettings( const QFont& new_font, bool svn, bool line )
 {
-    editor->changeFont( new_font );
+    myEditor->changeFont( new_font );
     lineNumberWidget->setFont( new_font );
 
     const QFontMetrics fm( new_font );
@@ -142,7 +154,7 @@ void LatexEditorView::updateFind()
     Stack->setMaximumHeight( findwidget->minimumSizeHint().height() );
     Stack->show();
 
-    const QTextCursor& cursor = editor->textCursor();
+    const QTextCursor& cursor = myEditor->textCursor();
     if( cursor.hasSelection() )
     {
         findwidget->ui.comboFind->lineEdit()->setText( cursor.selectedText() );
@@ -186,7 +198,7 @@ void LatexEditorView::updateReplace()
     Stack->setMaximumHeight( replacewidget->minimumSizeHint().height() );
     Stack->show();
 
-    const QTextCursor& cursor = editor->textCursor();
+    const QTextCursor& cursor = myEditor->textCursor();
     if( cursor.hasSelection() )
     {
         replacewidget->ui.comboFind->lineEdit()->setText( cursor.selectedText() );
@@ -209,7 +221,7 @@ void LatexEditorView::showGoto()
 
     gotolinewidget->ui.spinLine->setFocus();
     gotolinewidget->ui.spinLine->setMinimum( 1 );
-    gotolinewidget->ui.spinLine->setMaximum( editor->numoflines() );
+    gotolinewidget->ui.spinLine->setMaximum( myEditor->numoflines() );
     gotolinewidget->ui.spinLine->selectAll();
 }
 

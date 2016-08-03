@@ -2285,13 +2285,13 @@ void Texmaker::UpdateCaption()
 
     if( currentEditorView() )
     {
-        UndoAct->setEnabled( currentEditorView()->editor->  document()->isUndoAvailable());
-        RedoAct->setEnabled( currentEditorView()->editor->  document()->isRedoAvailable());
-        SaveAct->setEnabled( currentEditorView()->editor->  document()-> isModified());
-        CopyAct->setEnabled( currentEditorView()->editor->textCursor().hasSelection());
-        CutAct ->setEnabled( currentEditorView()->editor->textCursor().hasSelection());
+        UndoAct->setEnabled( currentEditorView()->editor().  document()->isUndoAvailable());
+        RedoAct->setEnabled( currentEditorView()->editor().  document()->isRedoAvailable());
+        SaveAct->setEnabled( currentEditorView()->editor().  document()-> isModified());
+        CopyAct->setEnabled( currentEditorView()->editor().textCursor().hasSelection());
+        CutAct ->setEnabled( currentEditorView()->editor().textCursor().hasSelection());
 
-        stat3->setText( QString( " %1 " ).arg( currentEditorView()->editor->getEncoding() ) );
+        stat3->setText( QString( " %1 " ).arg( currentEditorView()->editor().getEncoding() ) );
     }
     else
     {
@@ -2306,9 +2306,9 @@ void Texmaker::UpdateCaption()
 
     if( currentEditorView() )
     {
-        currentEditorView()->editor->setFocus();
-        showCursorPos( currentEditorView()->editor->textCursor().blockNumber() + 1
-                     , currentEditorView()->editor->textCursor().position() - currentEditorView()->editor->textCursor().block().position() + 1 );
+        currentEditorView()->editor().setFocus();
+        showCursorPos( currentEditorView()->editor().textCursor().blockNumber() + 1
+                     , currentEditorView()->editor().textCursor().position() - currentEditorView()->editor().textCursor().block().position() + 1 );
     }
     else
     {
@@ -2339,7 +2339,7 @@ void Texmaker::NewDocumentStatus( const bool m )
     }
     else
     {
-    	currentEditorView()->editor->updateRevisions();
+    	currentEditorView()->editor().updateRevisions();
     	comboFiles->setItemIcon( comboFiles->findData( finame, Qt::UserRole, Qt::MatchExactly | Qt::MatchCaseSensitive ), QIcon( ":/images/empty.png" ) );
     	if( ( check > -1 ) && ( check < OpenedFilesListWidget->count() ) )
         {
@@ -2605,40 +2605,40 @@ ComboFilesInsert(f);
 disconnect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
 EditorView->setCurrentIndex(EditorView->indexOf(edit));
 connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
-edit->editor->setReadOnly(false);
-if (hasDecodingError) edit->editor->setEncoding(new_encoding);
-else edit->editor->setEncoding(input_encoding);
+edit->editor().setReadOnly(false);
+if (hasDecodingError) edit->editor().setEncoding(new_encoding);
+else edit->editor().setEncoding(input_encoding);
 initCompleter();
-if (completion) edit->editor->setCompleter(completer);
-else edit->editor->setCompleter(0);
-edit->editor->setPlainText(text);
+if (completion) edit->editor().setCompleter(completer);
+else edit->editor().setCompleter(0);
+edit->editor().setPlainText(text);
 filenames.remove( edit);
 filenames.insert( edit, f );
 
-edit->editor->resetRevisions();
+edit->editor().resetRevisions();
 if(svnEnable) 
 {
-connect(new SvnHelper(f,svnPath), SIGNAL(uncommittedLines(QList<int>)),edit->editor , SLOT(setUncommittedLines(QList<int>)));
-edit->editor->viewport()->update();
+connect(new SvnHelper(f,svnPath), SIGNAL(uncommittedLines(QList<int>)), &edit->editor(), SLOT(setUncommittedLines(QList<int>)));
+edit->editor().viewport()->update();
 }
 
-edit->editor->document()->setModified(false);
-connect(edit->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-connect(edit->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-connect(edit->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-connect(edit->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-connect(edit->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-currentEditorView()->editor->setLastNumLines(currentEditorView()->editor->numoflines());
-connect(edit->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-connect(edit->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-connect(edit->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-connect(edit->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+edit->editor().document()->setModified(false);
+connect( edit->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+connect(&edit->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+connect(&edit->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+connect(&edit->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+connect(&edit->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+currentEditorView()->editor().setLastNumLines(currentEditorView()->editor().numoflines());
+connect(&edit->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+connect( edit->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+connect( edit->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+connect(&edit->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
 
-if (wordwrap) {edit->editor->setWordWrapMode(QTextOption::WordWrap);}
-else {edit->editor->setWordWrapMode(QTextOption::NoWrap);}
+if (wordwrap) {edit->editor().setWordWrapMode(QTextOption::WordWrap);}
+else {edit->editor().setWordWrapMode(QTextOption::NoWrap);}
 
 
 
@@ -2650,7 +2650,7 @@ UpdateStructure();
 UpdateBibliography();
 
 QString rootName,rootFilePath;
-QTextCursor curs(edit->editor->document());
+QTextCursor curs(edit->editor().document());
 curs.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor,1024);
 QString peekStr = curs.selectedText();
 QRegExp re("% *!TEX +root *= *([^\\x2029]+)\\x2029", Qt::CaseInsensitive);
@@ -2675,7 +2675,7 @@ activateWindow();
 setFocus();
 #endif
 if (winmaximized) setWindowState(windowState() & Qt::WindowMaximized | Qt::WindowActive);
-edit->editor->setFocus();
+edit->editor().setFocus();
 }
 
 void Texmaker::setLine( const QString &line )
@@ -2684,11 +2684,11 @@ bool ok;
 int l=line.toInt(&ok,10);
 if (currentEditorView() && ok)
 	{
-	QTextCursor cur=currentEditorView()->editor->textCursor();
+	QTextCursor cur=currentEditorView()->editor().textCursor();
 	cur.movePosition(QTextCursor::End);
-	currentEditorView()->editor->setTextCursor(cur);
-	currentEditorView()->editor->gotoLine(l-1);
-	currentEditorView()->editor->setFocus();
+	currentEditorView()->editor().setTextCursor(cur);
+	currentEditorView()->editor().gotoLine(l-1);
+	currentEditorView()->editor().setFocus();
 	}
 }
 
@@ -2696,7 +2696,7 @@ void Texmaker::insertFromCommandLine(const QString &entity)
 {
 if (currentEditorView())
 	{
-	currentEditorView()->editor->insertPlainText(entity);
+	currentEditorView()->editor().insertPlainText(entity);
 	#if !defined(Q_OS_MAC)
 	show();
 	if (windowState()==Qt::WindowMinimized) setWindowState(windowState() & ~Qt::WindowMinimized | Qt::WindowActive);
@@ -2705,7 +2705,7 @@ if (currentEditorView())
 	setFocus();
 	#endif
 	if (winmaximized) setWindowState(windowState() & Qt::WindowMaximized | Qt::WindowActive);
-	currentEditorView()->editor->setFocus();
+	currentEditorView()->editor().setFocus();
 	}
 }
 
@@ -2714,52 +2714,52 @@ void Texmaker::fileNew()
     LatexEditorView* const view = new LatexEditorView( 0, EditorFont, svnEnable, showline, edcolors(), hicolors(), inlinespellcheck
                                                      , spell_ignored_words, spellChecker, tabspaces, tabwidth, QKeySequence( keyToggleFocus )
                                                      , "untitled" + QString::number( untitled_id ), userTagsList );
-    view->editor->setReadOnly( false );
-    view->editor->setEncoding( input_encoding );
+    view->editor().setReadOnly( false );
+    view->editor().setEncoding( input_encoding );
     initCompleter();
     if( completion )
     {
-        view->editor->setCompleter( completer );
+        view->editor().setCompleter( completer );
     }
     else
     {
-        view->editor->setCompleter( 0 );
+        view->editor().setCompleter( 0 );
     }
     EditorView->addWidget( view );
     EditorView->setCurrentIndex( EditorView->indexOf( view ) );
     if( wordwrap )
     {
-        view->editor->setWordWrapMode( QTextOption::WordWrap );
+        view->editor().setWordWrapMode( QTextOption::WordWrap );
     }
     else
     {
-        view->editor->setWordWrapMode( QTextOption::NoWrap );
+        view->editor().setWordWrapMode( QTextOption::NoWrap );
     }
     filenames.remove( view );
     filenames.insert( view, "untitled" + QString::number( untitled_id ) );
     ComboFilesInsert( "untitled" + QString::number( untitled_id ) );
     ++untitled_id;
-    view->editor->document()->setModified( false );
-    currentEditorView()->editor->setLastNumLines( currentEditorView()->editor->numoflines() );
+    view->editor().document()->setModified( false );
+    currentEditorView()->editor().setLastNumLines( currentEditorView()->editor().numoflines() );
 
-    connect( view->editor->document(), SIGNAL( modificationChanged( bool ) ),    this, SLOT( NewDocumentStatus( bool ) ) );
-    connect( view->editor->document(), SIGNAL(       undoAvailable( bool ) ), UndoAct, SLOT(        setEnabled( bool ) ) );
-    connect( view->editor->document(), SIGNAL(       redoAvailable( bool ) ), RedoAct, SLOT(        setEnabled( bool ) ) );
-    connect( view->editor            , SIGNAL(       copyAvailable( bool ) ),  CutAct, SLOT(        setEnabled( bool ) ) );
-    connect( view->editor            , SIGNAL(       copyAvailable( bool ) ), CopyAct, SLOT(        setEnabled( bool ) ) );
+    connect( view->editor().document(), SIGNAL( modificationChanged( bool ) ),    this, SLOT( NewDocumentStatus( bool ) ) );
+    connect( view->editor().document(), SIGNAL(       undoAvailable( bool ) ), UndoAct, SLOT(        setEnabled( bool ) ) );
+    connect( view->editor().document(), SIGNAL(       redoAvailable( bool ) ), RedoAct, SLOT(        setEnabled( bool ) ) );
+    connect( &view->editor()          , SIGNAL(       copyAvailable( bool ) ),  CutAct, SLOT(        setEnabled( bool ) ) );
+    connect( &view->editor()          , SIGNAL(       copyAvailable( bool ) ), CopyAct, SLOT(        setEnabled( bool ) ) );
 
-    connect( view->editor, SIGNAL(                spellme(     ) ), this, SLOT(            editSpell(     ) ) );
-    connect( view->editor, SIGNAL(             tooltiptab(     ) ), this, SLOT(           editTipTab(     ) ) );
-    connect( view->editor, SIGNAL( requestUpdateStructure(     ) ), this, SLOT(      UpdateStructure(     ) ) );
-    connect( view->editor, SIGNAL(             requestpdf( int ) ), this, SLOT(        jumpToPdfline( int ) ) );
-    connect( view->editor, SIGNAL(        numLinesChanged( int ) ), this, SLOT( refreshAllFromCursor( int ) ) );
-    connect( view->editor, SIGNAL(   requestGotoStructure( int ) ), this, SLOT(      jumpToStructure( int ) ) );
+    connect( &view->editor(), SIGNAL(                spellme(     ) ), this, SLOT(            editSpell(     ) ) );
+    connect( &view->editor(), SIGNAL(             tooltiptab(     ) ), this, SLOT(           editTipTab(     ) ) );
+    connect( &view->editor(), SIGNAL( requestUpdateStructure(     ) ), this, SLOT(      UpdateStructure(     ) ) );
+    connect( &view->editor(), SIGNAL(             requestpdf( int ) ), this, SLOT(        jumpToPdfline( int ) ) );
+    connect( &view->editor(), SIGNAL(        numLinesChanged( int ) ), this, SLOT( refreshAllFromCursor( int ) ) );
+    connect( &view->editor(), SIGNAL(   requestGotoStructure( int ) ), this, SLOT(      jumpToStructure( int ) ) );
 
-    connect( view->editor, SIGNAL( poshaschanged( int, int ) ), this, SLOT( showCursorPos( int, int ) ) );
+    connect( &view->editor(), SIGNAL( poshaschanged( int, int ) ), this, SLOT( showCursorPos( int, int ) ) );
 
     UpdateCaption();
     NewDocumentStatus(false);
-    view->editor->setFocus();
+    view->editor().setFocus();
 }
 
 void Texmaker::fileNewFromFile()
@@ -2780,15 +2780,15 @@ if ( !file.open( QIODevice::ReadOnly ) )
 	}
 lastTemplate=fn;
 LatexEditorView *edit = new LatexEditorView(0,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),fn,userTagsList);
-edit->editor->setReadOnly(false);
-edit->editor->setEncoding(input_encoding);
+edit->editor().setReadOnly(false);
+edit->editor().setEncoding(input_encoding);
 initCompleter();
-if (completion) edit->editor->setCompleter(completer);
-else edit->editor->setCompleter(0);
+if (completion) edit->editor().setCompleter(completer);
+else edit->editor().setCompleter(0);
 EditorView->addWidget( edit);
 EditorView->setCurrentIndex(EditorView->indexOf(edit));
-if (wordwrap) {edit->editor->setWordWrapMode(QTextOption::WordWrap);}
-else {edit->editor->setWordWrapMode(QTextOption::NoWrap);}
+if (wordwrap) {edit->editor().setWordWrapMode(QTextOption::WordWrap);}
+else {edit->editor().setWordWrapMode(QTextOption::NoWrap);}
 filenames.remove( edit);
 filenames.insert( edit, "untitled"+QString::number(untitled_id));
 ComboFilesInsert("untitled"+QString::number(untitled_id));
@@ -2797,28 +2797,28 @@ QTextStream ts( &file );
 QTextCodec* codec = QTextCodec::codecForName(input_encoding.toLatin1());
 if(!codec) codec = QTextCodec::codecForLocale();
 ts.setCodec(codec);
-edit->editor->setPlainText( ts.readAll() );
+edit->editor().setPlainText( ts.readAll() );
 file.close();
-edit->editor->document()->setModified(true);
-connect(edit->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-connect(edit->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-connect(edit->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-currentEditorView()->editor->setLastNumLines(currentEditorView()->editor->numoflines());
-connect(edit->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-connect(edit->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-connect(edit->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-connect(edit->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-connect(edit->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-connect(edit->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-connect(edit->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+edit->editor().document()->setModified(true);
+connect(edit->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+connect(&edit->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+connect(&edit->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+currentEditorView()->editor().setLastNumLines(currentEditorView()->editor().numoflines());
+connect(&edit->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+connect(&edit->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+connect(&edit->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+connect( edit->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+connect( edit->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+connect(&edit->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+connect(&edit->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
 
 UpdateCaption();
 NewDocumentStatus(true);
 UpdateStructure();
 UpdateBibliography();
-edit->editor->setFocus();
+edit->editor().setFocus();
 }
 
 void Texmaker::fileOpen()
@@ -2866,7 +2866,7 @@ if ((filesNames.count()==1) && embedinternalpdf && builtinpdfview && showpdfview
 	}
     }
   }
-if (currentEditorView()) currentEditorView()->editor->setFocus();
+if (currentEditorView()) currentEditorView()->editor().setFocus();
 }
 
 bool Texmaker::isCurrentModifiedOutside()
@@ -2876,7 +2876,7 @@ QString fn=*filenames.find( currentEditorView() );
 QFileInfo fi(fn);
 fi.refresh();
 QDateTime disktime=fi.lastModified();
-int delta=disktime.secsTo(currentEditorView()->editor->getLastSavedTime());
+int delta=disktime.secsTo(currentEditorView()->editor().getLastSavedTime());
 if (watchfiles && (delta<-3)) return true;
 else return false;
 }
@@ -2935,36 +2935,36 @@ for( it = filenames.begin(); it != filenames.end(); ++it )
 			{
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 			QTextStream ts( &file );
-			QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+			QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 			ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-			disconnect(currentEditorView()->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-			disconnect(currentEditorView()->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-			disconnect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-			disconnect(currentEditorView()->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-			disconnect(currentEditorView()->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-			disconnect(currentEditorView()->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-			disconnect(currentEditorView()->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
-			currentEditorView()->editor->setPlainText( ts.readAll() );
+			disconnect( currentEditorView()->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+			disconnect( currentEditorView()->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+			disconnect( currentEditorView()->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+			currentEditorView()->editor().setPlainText( ts.readAll() );
 			file.close();
-			currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
-			connect(currentEditorView()->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-			connect(currentEditorView()->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-			connect(currentEditorView()->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-			connect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-			connect(currentEditorView()->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-			connect(currentEditorView()->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-			currentEditorView()->editor->setLastNumLines(currentEditorView()->editor->numoflines());
-			connect(currentEditorView()->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-			connect(currentEditorView()->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-			connect(currentEditorView()->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+			currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
+			connect( currentEditorView()->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+			connect(&currentEditorView()->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+			connect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+			connect(&currentEditorView()->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+			connect( currentEditorView()->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+			connect( currentEditorView()->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+			currentEditorView()->editor().setLastNumLines(currentEditorView()->editor().numoflines());
+			connect(&currentEditorView()->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+			connect(&currentEditorView()->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+			connect(&currentEditorView()->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
 			UpdateStructure();
 			UpdateBibliography();
 			QApplication::restoreOverrideCursor();
@@ -2977,15 +2977,15 @@ for( it = filenames.begin(); it != filenames.end(); ++it )
 		if (file.open( QIODevice::WriteOnly ) )
 		    {
 		    QTextStream ts( &file );
-		    QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+		    QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 		    ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-		    ts << currentEditorView()->editor->toPlainText();
+		    ts << currentEditorView()->editor().toPlainText();
 		    file.close();
-		    currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
-		    currentEditorView()->editor->document()->setModified(false);
+		    currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
+		    currentEditorView()->editor().document()->setModified(false);
 		    }
 		}
-		else currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
+		else currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
 	      }
 	    }
 	}
@@ -3033,12 +3033,12 @@ if (!finame.startsWith("untitled") && finame!="")
   }
 if   (currentEditorView())
   {
-   SaveAct->setEnabled(currentEditorView()->editor->document()->isModified());
-   UndoAct->setEnabled(currentEditorView()->editor->document()->isUndoAvailable());
-   RedoAct->setEnabled(currentEditorView()->editor->document()->isRedoAvailable());
-   CopyAct->setEnabled(currentEditorView()->editor->textCursor().hasSelection());
-   CutAct->setEnabled(currentEditorView()->editor->textCursor().hasSelection());
-   stat3->setText(QString(" %1 ").arg(currentEditorView()->editor->getEncoding()));
+   SaveAct->setEnabled(currentEditorView()->editor().document()->isModified());
+   UndoAct->setEnabled(currentEditorView()->editor().document()->isUndoAvailable());
+   RedoAct->setEnabled(currentEditorView()->editor().document()->isRedoAvailable());
+   CopyAct->setEnabled(currentEditorView()->editor().textCursor().hasSelection());
+   CutAct->setEnabled(currentEditorView()->editor().textCursor().hasSelection());
+   stat3->setText(QString(" %1 ").arg(currentEditorView()->editor().getEncoding()));
   }
 else
   {
@@ -3048,7 +3048,7 @@ else
    CopyAct->setEnabled(false);
    CutAct->setEnabled(false);    
   }
-if (currentEditorView()) currentEditorView()->editor->setFocus();
+if (currentEditorView()) currentEditorView()->editor().setFocus();
 }
 
 void Texmaker::fileSave()
@@ -3084,7 +3084,7 @@ else
 		  break;
 		case 2:
 		  default:
-		  currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
+		  currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
 		  return;
 		  break;
 		}
@@ -3096,12 +3096,12 @@ else
 		return;
 		}
 	QTextStream ts( &file );
-	QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+	QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 	ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-	ts << currentEditorView()->editor->toPlainText();
+	ts << currentEditorView()->editor().toPlainText();
 	file.close();
-	currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
-	currentEditorView()->editor->document()->setModified(false);
+	currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
+	currentEditorView()->editor().document()->setModified(false);
 	fn=getName();
 	AddRecentFile(fn);
 	}
@@ -3141,7 +3141,7 @@ else
 		  break;
 		case 2:
 		  default:
-		  currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
+		  currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
 		  return false;
 		  break;
 		}
@@ -3149,7 +3149,7 @@ else
 	QFile file(fn);
 	if ( !file.open( QIODevice::WriteOnly ) )
 		{
-		if (currentEditorView()->editor->document()->isModified())
+		if (currentEditorView()->editor().document()->isModified())
 		  {
 		  QMessageBox::warning( this,tr("Error"),tr("The file could not be saved. Please check if you have write permission."));
 		  return false;
@@ -3157,12 +3157,12 @@ else
 		else return true;
 		}
 	QTextStream ts( &file );
-	QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+	QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 	ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-	ts << currentEditorView()->editor->toPlainText();
+	ts << currentEditorView()->editor().toPlainText();
 	file.close();
-	currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
-	currentEditorView()->editor->document()->setModified(false);
+	currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
+	currentEditorView()->editor().document()->setModified(false);
 	fn=getName();
 	AddRecentFile(fn);
 	UpdateCaption();
@@ -3189,7 +3189,7 @@ if ( !fn.isEmpty() )
 	delete OpenedFilesListWidget->currentItem();
 	filenames.insert(currentEditorView(), fn );
 	fileSave();
-	currentEditorView()->editor->updateName(fn);
+	currentEditorView()->editor().updateName(fn);
 	ComboFilesInsert(fn);
 	}
 UpdateCaption();
@@ -3228,9 +3228,9 @@ for( it = filenames.begin(); it != filenames.end(); ++it )
 	    else
 		{
 		QTextStream ts( &file );
-		QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+		QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 		ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-		ts << currentEditorView()->editor->toPlainText();
+		ts << currentEditorView()->editor().toPlainText();
 		file.close();
 		}
 	    }
@@ -3257,9 +3257,9 @@ if ( !fn.isEmpty() )
 	if ( file.open( QIODevice::WriteOnly ) )
 	    {
 	    QTextStream ts( &file );
-	    QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor->getEncoding().toLatin1());
+	    QTextCodec* codec = QTextCodec::codecForName(currentEditorView()->editor().getEncoding().toLatin1());
 	    ts.setCodec(codec ? codec : QTextCodec::codecForLocale());
-	    ts << currentEditorView()->editor->toPlainText();
+	    ts << currentEditorView()->editor().toPlainText();
 	    file.close();
 	    }	  
 	}
@@ -3268,7 +3268,7 @@ if ( !fn.isEmpty() )
 void Texmaker::fileClose()
 {
 if ( !currentEditorView() )	return;
-if (currentEditorView()->editor->document()->isModified())
+if (currentEditorView()->editor().document()->isModified())
 	{
 int query;
 QString locale = TexmakerApp::instance()->language.left(2);
@@ -3334,7 +3334,7 @@ int query;
 QString locale = TexmakerApp::instance()->language.left(2);
 while (currentEditorView() && go)
 	{
-	if (currentEditorView()->editor->document()->isModified())
+	if (currentEditorView()->editor().document()->isModified())
 		{
 if (locale=="en")
 {
@@ -3400,7 +3400,7 @@ int query;
 QString locale = TexmakerApp::instance()->language.left(2);
 while (currentEditorView() && accept)
 	{
-	if (currentEditorView()->editor->document()->isModified())
+	if (currentEditorView()->editor().document()->isModified())
 		{
 if (locale=="en")
 {
@@ -3502,7 +3502,7 @@ QString locale = TexmakerApp::instance()->language.left(2);
 
 while (currentEditorView() && accept)
 	{
-	if (currentEditorView()->editor->document()->isModified())
+	if (currentEditorView()->editor().document()->isModified())
 		{
 if (locale=="en")
 {
@@ -3594,7 +3594,7 @@ if (action)
 	}
       }
   }
-if (currentEditorView()) currentEditorView()->editor->setFocus();
+if (currentEditorView()) currentEditorView()->editor().setFocus();
 }
 
 void Texmaker::AddRecentFile(const QString &f)
@@ -3635,7 +3635,7 @@ UpdateRecentFile();
 void Texmaker::filePrint()
 {
 if ( !currentEditorView() ) return;
-QTextDocument *document = currentEditorView()->editor->document();
+QTextDocument *document = currentEditorView()->editor().document();
 QPrinter printer;
 QPrintDialog *dlg = new QPrintDialog(&printer, this);
 if (dlg->exec() != QDialog::Accepted) return;
@@ -3647,10 +3647,10 @@ void Texmaker::fileOpenAndGoto(const QString &f, int line,bool focus)
 load(f);
 if (currentEditorView())
 	{
-	QTextCursor cur=currentEditorView()->editor->textCursor();
+	QTextCursor cur=currentEditorView()->editor().textCursor();
 	cur.movePosition(QTextCursor::End);
-	currentEditorView()->editor->setTextCursor(cur);
-	currentEditorView()->editor->gotoLine(line-1);
+	currentEditorView()->editor().setTextCursor(cur);
+	currentEditorView()->editor().gotoLine(line-1);
 	}
 setLine(QString::number(line));
 if (focus) getFocusToEditor();
@@ -3667,7 +3667,7 @@ if (windowState()==Qt::WindowMinimized) setWindowState(windowState() & ~Qt::Wind
 qApp->setActiveWindow(this);
 activateWindow();
 setFocus();
-if (currentEditorView()) currentEditorView()->editor->setFocus();
+if (currentEditorView()) currentEditorView()->editor().setFocus();
 }
 
 void Texmaker::fileReload()
@@ -3675,7 +3675,7 @@ void Texmaker::fileReload()
 if ( !currentEditorView() ) return;
 if ( getName().startsWith("untitled") ) return;
 QString f=filenames[currentEditorView()];
-if (currentEditorView()->editor->document()->isModified())
+if (currentEditorView()->editor().document()->isModified())
 	{
 	switch(  QMessageBox::warning(this, "Texmaker",
 					tr("The document contains unsaved work."
@@ -3784,37 +3784,37 @@ if (!dest.isEmpty())
 void Texmaker::editUndo()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->undoText();
+currentEditorView()->editor().undoText();
 }
 
 void Texmaker::editRedo()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->redoText();
+currentEditorView()->editor().redoText();
 }
 
 void Texmaker::editCut()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->cut();
+currentEditorView()->editor().cut();
 }
 
 void Texmaker::editCopy()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->copy();
+currentEditorView()->editor().copy();
 }
 
 void Texmaker::editPaste()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->paste();
+currentEditorView()->editor().paste();
 }
 
 void Texmaker::editSelectAll()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->selectAll();
+currentEditorView()->editor().selectAll();
 }
 
 void Texmaker::editFindInDirectory()
@@ -3856,25 +3856,25 @@ currentEditorView()->showGoto();
 void Texmaker::editComment()
 {
 if ( !currentEditorView() )	return;
-currentEditorView()->editor->commentSelection();
+currentEditorView()->editor().commentSelection();
 }
 
 void Texmaker::editUncomment()
 {
 if ( !currentEditorView() )	return;
-currentEditorView()->editor->uncommentSelection();
+currentEditorView()->editor().uncommentSelection();
 }
 
 void Texmaker::editIndent()
 {
 if ( !currentEditorView() )	return;
-currentEditorView()->editor->indentSelection();
+currentEditorView()->editor().indentSelection();
 }
 
 void Texmaker::editUnindent()
 {
 if ( !currentEditorView() )	return;
-currentEditorView()->editor->unindentSelection();
+currentEditorView()->editor().unindentSelection();
 }
 
 void Texmaker::editSpell()
@@ -3882,12 +3882,12 @@ void Texmaker::editSpell()
 if ( !currentEditorView() )	return;
 if (spelldicExist()) 
 	{
-	SpellerDialog *spellDlg=new SpellerDialog(this,currentEditorView()->editor,spell_ignored_words);
+	SpellerDialog *spellDlg=new SpellerDialog(this,&currentEditorView()->editor(),spell_ignored_words);
 	if (spellDlg->exec())
 		{
 		spell_ignored_words=spellDlg->alwaysignoredwordList.join(",");
-		currentEditorView()->editor->highlighter->SetAlwaysIgnoredWords(spell_ignored_words);
-		currentEditorView()->editor->highlighter->rehighlight();
+		currentEditorView()->editor().highlighter->SetAlwaysIgnoredWords(spell_ignored_words);
+		currentEditorView()->editor().highlighter->rehighlight();
 		}
 	}
 else
@@ -3916,7 +3916,7 @@ if (!lastScript.isEmpty())
 QString fn = QFileDialog::getOpenFileName(this,tr("Browse script"),currentDir,"Script (*.tms)");
 if (fn.isEmpty()) return;
 lastScript=fn;
-currentEditorView()->editor->ExecuteScript(fn);
+currentEditorView()->editor().ExecuteScript(fn);
 }
 
 void Texmaker::editRunFurnishedScript()
@@ -3946,7 +3946,7 @@ if (action)
 	QFileInfo fic(scriptfile);
 	if (fic.exists() && fic.isReadable() )
 		{
-		currentEditorView()->editor->ExecuteScript(scriptfile);
+		currentEditorView()->editor().ExecuteScript(scriptfile);
 		}
 	else { QMessageBox::warning( this,tr("Error"),tr("File not found"));}
 	
@@ -4928,8 +4928,8 @@ QTreeWidgetItem *blocklabel = new QTreeWidgetItem(top);
 blocklabel->setText(0,"BLOCKS");
 blocklabel->setFont(0,deft);
 QString s;
-QTextBlock p = currentEditorView()->editor->document()->begin();
-const QList<StructItem>& structure = currentEditorView()->editor->getStructItems();
+QTextBlock p = currentEditorView()->editor().document()->begin();
+const QList<StructItem>& structure = currentEditorView()->editor().getStructItems();
 for (int j = 0; j < structure.count(); j++)
 {
       switch (structure.at(j).type)
@@ -5072,17 +5072,17 @@ if (fItems.size()>0 )
 
 /************************************************/
 
-currentEditorView()->editor->foldableLines.clear();
-int endpreamble = currentEditorView()->editor->searchLine("\\begin{document}");
-if (endpreamble>1) currentEditorView()->editor->foldableLines.insert(0,endpreamble-1);
+currentEditorView()->editor().foldableLines.clear();
+int endpreamble = currentEditorView()->editor().searchLine("\\begin{document}");
+if (endpreamble>1) currentEditorView()->editor().foldableLines.insert(0,endpreamble-1);
 ParseTree(top);
 UpdateChildsLabels(listchildfiles);
 updateCompleter();
 if (currentEditorView())
   {
-  if (completion) currentEditorView()->editor->setCompleter(completer);
-  else currentEditorView()->editor->setCompleter(0);
-  currentEditorView()->editor->matchAll();
+  if (completion) currentEditorView()->editor().setCompleter(completer);
+  else currentEditorView()->editor().setCompleter(0);
+  currentEditorView()->editor().matchAll();
   }
 }
 
@@ -5184,9 +5184,9 @@ types << QLatin1String("article") << QLatin1String("book")
 updateCompleter();
 if (currentEditorView())
   {
-  if (completion) currentEditorView()->editor->setCompleter(completer);
-  else currentEditorView()->editor->setCompleter(0);
-  currentEditorView()->editor->matchAll();
+  if (completion) currentEditorView()->editor().setCompleter(completer);
+  else currentEditorView()->editor().setCompleter(0);
+  currentEditorView()->editor().matchAll();
   }
 }
 
@@ -5214,7 +5214,7 @@ void Texmaker::ParseTree(QTreeWidgetItem *item)
 int Texmaker::LevelItem(const QTreeWidgetItem *item)
 {
 int level=0;
-const QList<StructItem>& structure = currentEditorView()->editor->getStructItems();
+const QList<StructItem>& structure = currentEditorView()->editor().getStructItems();
 if ((item) && (structure.count()>0))
   {
   int index = item->text(1).toInt();
@@ -5243,7 +5243,7 @@ return level;*/
 int Texmaker::LineItem(const QTreeWidgetItem *item)
 {
 int line=-1;
-const QList<StructItem>& structure = currentEditorView()->editor->getStructItems();
+const QList<StructItem>& structure = currentEditorView()->editor().getStructItems();
 if ((item) && (structure.count()>0))
   {
   int index = item->text(1).toInt();
@@ -5297,10 +5297,10 @@ if (level>=1)
   if (index>=0 && index<parentitem->childCount()-1) end=LineItem(parentitem->child(index+1));
   else  
     {
-    end=currentEditorView()->editor->searchLine("\\end{document}");
-    if (end<0) end=currentEditorView()->editor->numoflines();
+    end=currentEditorView()->editor().searchLine("\\end{document}");
+    if (end<0) end=currentEditorView()->editor().numoflines();
     }
-  if (start<end-1) {currentEditorView()->editor->foldableLines.insert(start,end-1);}
+  if (start<end-1) {currentEditorView()->editor().foldableLines.insert(start,end-1);}
   }
 }
 
@@ -5326,7 +5326,7 @@ basename=name.left(name.length()-flname.length());
 if (item)
   {
   int index = item->text(1).toInt();
-  const QList<StructItem>& structure = currentEditorView()->editor->getStructItems();
+  const QList<StructItem>& structure = currentEditorView()->editor().getStructItems();
   if (index<structure.count())
       {
       int type=structure.at(index).type;
@@ -5342,7 +5342,7 @@ if (item)
 	  }
 	else
 	  {
-	    currentEditorView()->editor->gotoLine(structure.at(index).cursor.block().blockNumber());
+	    currentEditorView()->editor().gotoLine(structure.at(index).cursor.block().blockNumber());
 	    if (!hasname) return;
 	    QFileInfo fic(finame);
 	    if (!fic.exists()) return;
@@ -5368,26 +5368,26 @@ void Texmaker::InsertTag(QString Entity, int dx, int dy)
 {
 if ( !currentEditorView() )	return;
 OutputTextEdit->clear();
-QTextCursor cur=currentEditorView()->editor->textCursor();
+QTextCursor cur=currentEditorView()->editor().textCursor();
 int pos=cur.position();
 if (!Entity.startsWith("\\og")) Entity.replace("{}","{"+QString(0x2022)+"}");
 Entity.replace("[]","["+QString(0x2022)+"]");
 Entity.replace("\n\n","\n"+QString(0x2022)+"\n");
-currentEditorView()->editor->insertWithMemoryIndent(Entity);
+currentEditorView()->editor().insertWithMemoryIndent(Entity);
 cur.setPosition(pos,QTextCursor::MoveAnchor);
 if (Entity.contains(QString(0x2022))) 
     {
-    currentEditorView()->editor->setTextCursor(cur);
-    currentEditorView()->editor->search(QString(0x2022) ,true,false,true,true,false);
+    currentEditorView()->editor().setTextCursor(cur);
+    currentEditorView()->editor().search(QString(0x2022) ,true,false,true,true,false);
     OutputTextEdit->insertLine("Use the Tab key to reach the next "+QString(0x2022)+" field");
     }
 else
     {
     if (dy>0) cur.movePosition(QTextCursor::Down,QTextCursor::MoveAnchor,dy);
     if (dx>0) cur.movePosition(QTextCursor::NextCharacter,QTextCursor::MoveAnchor,dx);
-    currentEditorView()->editor->setTextCursor(cur);
+    currentEditorView()->editor().setTextCursor(cur);
     }
-currentEditorView()->editor->setFocus();
+currentEditorView()->editor().setFocus();
 OutputTableWidget->hide();
 OutputTextEdit->setMaximumHeight(splitter2->sizes().at(1));
 separatorline->hide();
@@ -5434,8 +5434,8 @@ if (item  && !item->font().bold())
 	dy=tagList.at(2).toInt();
 	if ((dx==0) && (dy==0)) 
 	{
-	if (!currentEditorView()->editor->textCursor().hasSelection()) dx=code.length();
-	else dx=code.length()-currentEditorView()->editor->textCursor().selectedText().length();
+	if (!currentEditorView()->editor().textCursor().hasSelection()) dx=code.length();
+	else dx=code.length()-currentEditorView()->editor().textCursor().selectedText().length();
 	}
 	InsertTag(code,dx,dy);
 	}
@@ -5494,16 +5494,16 @@ if (action)
 	{
 	actData=action->data().toString();
 	tagList= actData.split("/");
-	if (!currentEditorView()->editor->textCursor().hasSelection())
+	if (!currentEditorView()->editor().textCursor().hasSelection())
 		{
 		OutputTextEdit->insertLine("You can select a text before using this environment.");
 		InsertTag(tagList.at(0)+tagList.at(1),tagList.at(2).toInt(&ok, 10),tagList.at(3).toInt(&ok, 10));
 		}
 	else
 		{
-		currentEditorView()->editor->cut();
+		currentEditorView()->editor().cut();
 		InsertTag(tagList.at(0)+tagList.at(1),tagList.at(2).toInt(&ok, 10),tagList.at(3).toInt(&ok, 10));
-		currentEditorView()->editor->paste();
+		currentEditorView()->editor().paste();
 		}
 	}
 }
@@ -5514,15 +5514,15 @@ bool ok;
 QStringList tagList;
 if ( !currentEditorView() )	return;
 tagList= text.split("/");
-if (!currentEditorView()->editor->textCursor().hasSelection())
+if (!currentEditorView()->editor().textCursor().hasSelection())
 	{
 	InsertTag(tagList.at(0)+QString(0x2022)+tagList.at(1),tagList.at(2).toInt(&ok, 10),tagList.at(3).toInt(&ok, 10));
 	}
 else
 	{
-	currentEditorView()->editor->cut();
+	currentEditorView()->editor().cut();
 	InsertTag(tagList.at(0)+QString(0x2022)+tagList.at(1),tagList.at(2).toInt(&ok, 10),tagList.at(3).toInt(&ok, 10));
-	currentEditorView()->editor->paste();
+	currentEditorView()->editor().paste();
 	}
 }
 
@@ -6274,14 +6274,14 @@ if ( beamDlg->exec() )
 	if (currentEditorView())
 	  {
 	  OutputTextEdit->clear();
-	  QTextCursor cur=currentEditorView()->editor->textCursor();
+	  QTextCursor cur=currentEditorView()->editor().textCursor();
 	  int pos=cur.position();;
-	  currentEditorView()->editor->insertWithMemoryIndent(tag);
+	  currentEditorView()->editor().insertWithMemoryIndent(tag);
 	  cur.setPosition(pos,QTextCursor::MoveAnchor);
-	  currentEditorView()->editor->setTextCursor(cur);
-	  currentEditorView()->editor->search(QString(0x2022) ,true,false,true,true,false);
+	  currentEditorView()->editor().setTextCursor(cur);
+	  currentEditorView()->editor().search(QString(0x2022) ,true,false,true,true,false);
 	  OutputTextEdit->insertLine("Use the Tab key to reach the next "+QString(0x2022)+" field");
-	  currentEditorView()->editor->setFocus();
+	  currentEditorView()->editor().setFocus();
 	  OutputTableWidget->hide();
 	  OutputTextEdit->setMaximumHeight(splitter2->sizes().at(1));
 	  separatorline->hide();
@@ -6901,16 +6901,16 @@ OutputTextEdit->insertLine( "OPT.... : optional fields (use the 'Clean' command 
 void Texmaker::CleanBib()
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->removeOptAlt();
+currentEditorView()->editor().removeOptAlt();
 }
 
 void Texmaker::InsertUserTag(QString Entity)
 {
 if ( !currentEditorView() )	return;
-QString pre=currentEditorView()->editor->beginningLine();
-QTextCursor cur=currentEditorView()->editor->textCursor();
+QString pre=currentEditorView()->editor().beginningLine();
+QTextCursor cur=currentEditorView()->editor().textCursor();
 bool selection=cur.hasSelection();
-if (selection) currentEditorView()->editor->cut();
+if (selection) currentEditorView()->editor().cut();
 int pos=cur.position();
 
 QRegExp rx("(@+)");
@@ -6922,21 +6922,21 @@ else if (rx.cap(1)=="@@") Entity.replace(rx.pos(1),2,"@");
 index += rx.matchedLength();
 }
 
-currentEditorView()->editor->insertWithMemoryIndent(Entity);
+currentEditorView()->editor().insertWithMemoryIndent(Entity);
 cur.setPosition(pos,QTextCursor::MoveAnchor);
 int dx=Entity.length();
 if (Entity.contains(QString(0x2022))) 
     {
-    currentEditorView()->editor->setTextCursor(cur);
-    currentEditorView()->editor->search(QString(0x2022) ,true,false,true,true,false);
-    if (selection) currentEditorView()->editor->paste();
+    currentEditorView()->editor().setTextCursor(cur);
+    currentEditorView()->editor().search(QString(0x2022) ,true,false,true,true,false);
+    if (selection) currentEditorView()->editor().paste();
     }
 else
     {
     if (dx>0) cur.movePosition(QTextCursor::NextCharacter,QTextCursor::MoveAnchor,dx);
-    currentEditorView()->editor->setTextCursor(cur);
+    currentEditorView()->editor().setTextCursor(cur);
     }
-currentEditorView()->editor->setFocus();
+currentEditorView()->editor().setFocus();
 OutputTextEdit->clear();
 OutputTableWidget->hide();
 OutputTextEdit->setMaximumHeight(splitter2->sizes().at(1));
@@ -7254,7 +7254,7 @@ QAction *action = qobject_cast<QAction *>(sender());
 QString text=action->text();
 if (text=="tiny")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\tiny /}/7/0");
 	    }
@@ -7263,7 +7263,7 @@ if (text=="tiny")
 	}
 if (text=="scriptsize")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\scriptsize /}/13/0");
 	    }
@@ -7272,7 +7272,7 @@ if (text=="scriptsize")
 	}
 if (text=="footnotesize")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\footnotesize /}/15/0");
 	    }
@@ -7281,7 +7281,7 @@ if (text=="footnotesize")
 	}
 if (text=="small")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\small /}/8/0");
 	    }
@@ -7290,7 +7290,7 @@ if (text=="small")
 	}
 if (text=="normalsize")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\normalsize /}/13/0");
 	    }
@@ -7299,7 +7299,7 @@ if (text=="normalsize")
 	}
 if (text=="large")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\large /}/8/0");
 	    }
@@ -7308,7 +7308,7 @@ if (text=="large")
 	}
 if (text=="Large")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\Large /}/8/0");
 	    }
@@ -7317,7 +7317,7 @@ if (text=="Large")
 	}
 if (text=="LARGE")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\LARGE /}/8/0");
 	    }
@@ -7326,7 +7326,7 @@ if (text=="LARGE")
 	}
 if (text=="huge")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\huge /}/7/0");
 	    }
@@ -7335,7 +7335,7 @@ if (text=="huge")
 	}
 if (text=="Huge")
 	{
-	if (currentEditorView()->editor->textCursor().hasSelection() && !currentEditorView()->editor->textCursor().selectedText().contains(QString(0x2029)))
+	if (currentEditorView()->editor().textCursor().hasSelection() && !currentEditorView()->editor().textCursor().selectedText().contains(QString(0x2029)))
 	    {
 	    InsertWithSelectionFromString("{\\Huge /}/7/0");
 	    }
@@ -7381,7 +7381,7 @@ QFileInfo ficur(getName());
 int currentline=1;
 if (currentEditorView() )
   {
-  currentline=currentEditorView()->editor->linefromblock(currentEditorView()->editor->textCursor().block());
+  currentline=currentEditorView()->editor().linefromblock(currentEditorView()->editor().textCursor().block());
   }
 
 
@@ -8777,7 +8777,7 @@ if (!showoutputview) ShowOutputView(true);
 void Texmaker::ClickedOnOutput(int l)
 {
 if ( !currentEditorView() ) return;
-currentEditorView()->editor->gotoLine(l);
+currentEditorView()->editor().gotoLine(l);
 }
 
 void Texmaker::ClickedOnLogLine(QTableWidgetItem *item)
@@ -8839,7 +8839,7 @@ if (Start!=-1)
 int l=line.toInt(&ok,10)-1;
 if (ok)
 	{
-	if (file.isEmpty()) currentEditorView()->editor->gotoLine(l);
+	if (file.isEmpty()) currentEditorView()->editor().gotoLine(l);
 	else 
 	  {
 	  QFileInfo fi(file);
@@ -9285,7 +9285,7 @@ TexdocDialog *texdocDlg = new TexdocDialog(this);
 texdocDlg->ui.lineEditCommand->setText(texdoc_command);
 if (currentEditorView())
   {
-  if (currentEditorView()->editor->textCursor().hasSelection()) item=currentEditorView()->editor->textCursor().selectedText();
+  if (currentEditorView()->editor().textCursor().hasSelection()) item=currentEditorView()->editor().textCursor().selectedText();
   }
 texdocDlg->ui.lineEdit->setText(item);
 if (texdocDlg->exec())
@@ -9635,7 +9635,7 @@ if (confDlg->exec())
 	QTextCodec* codec = QTextCodec::codecForName(input_encoding.toLatin1());
 	if(!codec) codec = QTextCodec::codecForLocale();
 	
-	QString tmpSource =sourceviewerWidget->editor->toPlainText();
+	QString tmpSource = sourceviewerWidget->editor->toPlainText();
 	sourceviewerWidget->editor->setEncoding(input_encoding);
 	if (wordwrap) {sourceviewerWidget->editor->setWordWrapMode(QTextOption::WordWrap);}
 	else {sourceviewerWidget->editor->setWordWrapMode(QTextOption::NoWrap);}
@@ -9657,53 +9657,53 @@ if (confDlg->exec())
 			{
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 			EditorView->setCurrentIndex(EditorView->indexOf(it.key()));
-			bool  MODIFIED =currentEditorView()->editor->document()->isModified();
-			QString tmp =currentEditorView()->editor->toPlainText();
-			disconnect(currentEditorView()->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-			disconnect(currentEditorView()->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-			disconnect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-			disconnect(currentEditorView()->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-			disconnect(currentEditorView()->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-			disconnect(currentEditorView()->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-			disconnect(currentEditorView()->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-			disconnect(currentEditorView()->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
-			currentEditorView()->editor->setSpellChecker(spellChecker);
-			currentEditorView()->editor->highlighter->setSpellChecker(spellChecker);
-			currentEditorView()->editor->activateInlineSpell(inlinespellcheck);
-			currentEditorView()->editor->highlighter->activateInlineSpell(inlinespellcheck);
-			if (wordwrap) {currentEditorView()->editor->setWordWrapMode(QTextOption::WordWrap);}
-			else {currentEditorView()->editor->setWordWrapMode(QTextOption::NoWrap);}
-			if (completion) currentEditorView()->editor->setCompleter(completer);
-			else currentEditorView()->editor->setCompleter(0);
-			currentEditorView()->editor->setTabSettings(tabspaces,tabwidth);
-			currentEditorView()->editor->setKeyViewerFocus(QKeySequence(keyToggleFocus));
+			bool  MODIFIED =currentEditorView()->editor().document()->isModified();
+			QString tmp =currentEditorView()->editor().toPlainText();
+			disconnect( currentEditorView()->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+			disconnect( currentEditorView()->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+			disconnect( currentEditorView()->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+			disconnect(&currentEditorView()->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+			currentEditorView()->editor().setSpellChecker(spellChecker);
+			currentEditorView()->editor().highlighter->setSpellChecker(spellChecker);
+			currentEditorView()->editor().activateInlineSpell(inlinespellcheck);
+			currentEditorView()->editor().highlighter->activateInlineSpell(inlinespellcheck);
+			if (wordwrap) {currentEditorView()->editor().setWordWrapMode(QTextOption::WordWrap);}
+			else {currentEditorView()->editor().setWordWrapMode(QTextOption::NoWrap);}
+			if (completion) currentEditorView()->editor().setCompleter(completer);
+			else currentEditorView()->editor().setCompleter(0);
+			currentEditorView()->editor().setTabSettings(tabspaces,tabwidth);
+			currentEditorView()->editor().setKeyViewerFocus(QKeySequence(keyToggleFocus));
 			currentEditorView()->changeSettings(EditorFont,svnEnable,showline);
-			currentEditorView()->editor->highlighter->setColors(hicolors());
-			currentEditorView()->editor->setColors(edcolors());
+			currentEditorView()->editor().highlighter->setColors(hicolors());
+			currentEditorView()->editor().setColors(edcolors());
 
 			QTextStream ts( &tmp,QIODevice::ReadOnly );
 			ts.setCodec(codec);
-			currentEditorView()->editor->setPlainText( ts.readAll() );
-			currentEditorView()->editor->setLastSavedTime(QDateTime::currentDateTime());
-			if( MODIFIED ) currentEditorView()->editor->document()->setModified(true );
-			else currentEditorView()->editor->document()->setModified( false );
-			connect(currentEditorView()->editor->document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
-			connect(currentEditorView()->editor, SIGNAL(spellme()), this, SLOT(editSpell()));
-			connect(currentEditorView()->editor, SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
-			connect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-			connect(currentEditorView()->editor, SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
-			connect(currentEditorView()->editor->document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor->document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
-			connect(currentEditorView()->editor, SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
-			currentEditorView()->editor->setLastNumLines(currentEditorView()->editor->numoflines());
-			connect(currentEditorView()->editor, SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
-			connect(currentEditorView()->editor, SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
-			connect(currentEditorView()->editor, SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
+			currentEditorView()->editor().setPlainText( ts.readAll() );
+			currentEditorView()->editor().setLastSavedTime(QDateTime::currentDateTime());
+			if( MODIFIED ) currentEditorView()->editor().document()->setModified(true );
+			else currentEditorView()->editor().document()->setModified( false );
+			connect( currentEditorView()->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(spellme()), this, SLOT(editSpell()));
+			connect(&currentEditorView()->editor(), SIGNAL(tooltiptab()), this, SLOT(editTipTab()));
+			connect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+			connect(&currentEditorView()->editor(), SIGNAL(requestpdf(int)),this, SLOT(jumpToPdfline(int)));
+			connect( currentEditorView()->editor().document(), SIGNAL(undoAvailable(bool)),UndoAct, SLOT(setEnabled(bool)));
+			connect( currentEditorView()->editor().document(), SIGNAL(redoAvailable(bool)),RedoAct, SLOT(setEnabled(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CutAct, SLOT(setEnabled(bool)));
+			connect(&currentEditorView()->editor(), SIGNAL(copyAvailable(bool)), CopyAct, SLOT(setEnabled(bool)));
+			currentEditorView()->editor().setLastNumLines(currentEditorView()->editor().numoflines());
+			connect(&currentEditorView()->editor(), SIGNAL(numLinesChanged(int)), this, SLOT(refreshAllFromCursor(int)));
+			connect(&currentEditorView()->editor(), SIGNAL(requestGotoStructure(int)),this, SLOT(jumpToStructure(int)));
+			connect(&currentEditorView()->editor(), SIGNAL(poshaschanged(int,int)),this, SLOT(showCursorPos(int,int)));
 			QApplication::restoreOverrideCursor();
 			}
 		EditorView->setCurrentIndex(EditorView->indexOf(temp));
@@ -9714,7 +9714,7 @@ if (confDlg->exec())
 		OutputTableWidget->hide();
 		OutputTextEdit->setMaximumHeight(splitter2->sizes().at(1));
 		separatorline->hide();
-		currentEditorView()->editor->setFocus();
+		currentEditorView()->editor().setFocus();
 		}
 	}
 if (autosave)
@@ -9813,22 +9813,22 @@ if (xfdlg->exec())
 void Texmaker::gotoBookmark1()
 {
 if ( !currentEditorView() ) return;
-int l=currentEditorView()->editor->UserBookmark[0];
-if (l>0) currentEditorView()->editor->gotoLine(l-1);
+int l=currentEditorView()->editor().UserBookmark[0];
+if (l>0) currentEditorView()->editor().gotoLine(l-1);
 }
 
 void Texmaker::gotoBookmark2()
 {
 if ( !currentEditorView() ) return;
-int l=currentEditorView()->editor->UserBookmark[1];
-if (l>0) currentEditorView()->editor->gotoLine(l-1);
+int l=currentEditorView()->editor().UserBookmark[1];
+if (l>0) currentEditorView()->editor().gotoLine(l-1);
 }
 
 void Texmaker::gotoBookmark3()
 {
 if ( !currentEditorView() ) return;
-int l=currentEditorView()->editor->UserBookmark[2];
-if (l>0) currentEditorView()->editor->gotoLine(l-1);
+int l=currentEditorView()->editor().UserBookmark[2];
+if (l>0) currentEditorView()->editor().gotoLine(l-1);
 }
 
 void Texmaker::dragEnterEvent(QDragEnterEvent *event)
@@ -9935,7 +9935,7 @@ if (action)
 		FilesMap::Iterator it;
 		for( it = filenames.begin(); it != filenames.end(); ++it )
 			{
-			it.key()->editor->setUserTagsList(userTagsList);
+			it.key()->editor().setUserTagsList(userTagsList);
 			}
 		}
 	}
@@ -9965,7 +9965,7 @@ if ( atDlg->exec() )
 	    FilesMap::Iterator it;
 	    for( it = filenames.begin(); it != filenames.end(); ++it )
 		    {
-		    it.key()->editor->setUserTagsList(userTagsList);
+		    it.key()->editor().setUserTagsList(userTagsList);
 		    }
 	    }
     
@@ -10007,7 +10007,7 @@ if (currentEditorView())
     FilesMap::Iterator it;
     for( it = filenames.begin(); it != filenames.end(); ++it )
 	    {
-	    it.key()->editor->setUserTagsList(userTagsList);
+	    it.key()->editor().setUserTagsList(userTagsList);
 	    }
     }
 }
@@ -10058,7 +10058,7 @@ if (action)
 			    FilesMap::Iterator it;
 			    for( it = filenames.begin(); it != filenames.end(); ++it )
 				    {
-				    it.key()->editor->setUserTagsList(userTagsList);
+				    it.key()->editor().setUserTagsList(userTagsList);
 				    }
 			    }
 		    
@@ -10318,43 +10318,43 @@ PasteAct->setEnabled(!QApplication::clipboard()->text().isEmpty());
 void Texmaker::refreshAll()
 {
 if ( !currentEditorView() ) return;
-disconnect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-currentEditorView()->editor->highlighter->rehighlight();
+disconnect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+currentEditorView()->editor().highlighter->rehighlight();
 UpdateStructure();
-connect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+connect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
 }
 
 void Texmaker::refreshAllFromCursor(int newnumlines)
 {
-disconnect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
-int oldnumlines=currentEditorView()->editor->getLastNumLines();
+disconnect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+int oldnumlines=currentEditorView()->editor().getLastNumLines();
 int delta=newnumlines-oldnumlines;
-QTextBlock p = currentEditorView()->editor->textCursor().block();
+QTextBlock p = currentEditorView()->editor().textCursor().block();
 int currentline=p.blockNumber();
 int i=currentline-1;
 QList<int> start,end;
 while (p.isValid())
   {
-  if (currentEditorView()->editor->foldedLines.keys().contains(i))
+  if (currentEditorView()->editor().foldedLines.keys().contains(i))
     {
     start.append(i+delta);
-    end.append(currentEditorView()->editor->foldedLines[i]+delta);
-    currentEditorView()->editor->foldedLines.remove(i);
+    end.append(currentEditorView()->editor().foldedLines[i]+delta);
+    currentEditorView()->editor().foldedLines.remove(i);
     }
   i++;
   p = p.next();
   }
-for (int i =0; i <start.count(); i++) currentEditorView()->editor->foldedLines.insert(start[i],end[i]);
-connect(currentEditorView()->editor, SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
+for (int i =0; i <start.count(); i++) currentEditorView()->editor().foldedLines.insert(start[i],end[i]);
+connect(&currentEditorView()->editor(), SIGNAL(requestUpdateStructure()), this, SLOT(UpdateStructure()));
 refreshRange();
-currentEditorView()->editor->setLastNumLines(newnumlines);
+currentEditorView()->editor().setLastNumLines(newnumlines);
 }
 
 void Texmaker::refreshRange()
 {
-    currentEditorView()->editor->foldableLines.clear();
-    int endpreamble = currentEditorView()->editor->searchLine("\\begin{document}");
-    if (endpreamble>1) currentEditorView()->editor->foldableLines.insert(0,endpreamble-1);
+    currentEditorView()->editor().foldableLines.clear();
+    int endpreamble = currentEditorView()->editor().searchLine("\\begin{document}");
+    if (endpreamble>1) currentEditorView()->editor().foldableLines.insert(0,endpreamble-1);
     int nb=StructureTreeWidget->topLevelItemCount();
     if (nb>0)
     {
@@ -10363,12 +10363,12 @@ void Texmaker::refreshRange()
     	    ParseTree(StructureTreeWidget->topLevelItem(i));
     	}
     }
-    currentEditorView()->editor->matchAll();
+    currentEditorView()->editor().matchAll();
 }
 
 void Texmaker::jumpToStructure(int line)
 {
-const QList<StructItem>& structure = currentEditorView()->editor->getStructItems();
+const QList<StructItem>& structure = currentEditorView()->editor().getStructItems();
 int index=-1;
 for (int j = 0; j < structure.count(); j++)
     {
@@ -10427,7 +10427,7 @@ int pos=0;
 QTextCursor cur;
 if (currentEditorView() )
   {
-  cur=currentEditorView()->editor->textCursor();
+  cur=currentEditorView()->editor().textCursor();
   pos=cur.position();
   }
 if (change) showstructview=!showstructview;
@@ -10441,8 +10441,8 @@ else
    if (currentEditorView()) 
       {
       cur.setPosition(pos,QTextCursor::MoveAnchor);
-      currentEditorView()->editor->setTextCursor(cur);
-      currentEditorView()->editor->setFocus();
+      currentEditorView()->editor().setTextCursor(cur);
+      currentEditorView()->editor().setFocus();
       }
    }
 ViewStructurePanelAct->setChecked(showstructview);
@@ -10456,7 +10456,7 @@ if (showoutputview)
     {
     Outputframe->show();
     splitter2Changed();
-    if (currentEditorView()) QTimer::singleShot(10,currentEditorView()->editor, SLOT(setCursorVisible()));
+    if (currentEditorView()) QTimer::singleShot(10, &currentEditorView()->editor(), SLOT(setCursorVisible()));
     }
 else
    {
@@ -10570,9 +10570,9 @@ if ( ucDlg->exec() )
 	updateCompleter();
 	if (currentEditorView())
 	  {
-	  if (completion) currentEditorView()->editor->setCompleter(completer);
-	  else currentEditorView()->editor->setCompleter(0);
-	  currentEditorView()->editor->matchAll();
+	  if (completion) currentEditorView()->editor().setCompleter(completer);
+	  else currentEditorView()->editor().setCompleter(0);
+	  currentEditorView()->editor().matchAll();
 	  }
 	}
 }
@@ -10781,10 +10781,10 @@ if ( !fn.isEmpty() )
 		    {
 		    element=doc.createElement("document");
 		    element.setAttribute("file",docname);
-		    element.setAttribute("line",QString::number(itf.key()->editor->textCursor().blockNumber()));
-		    element.setAttribute("bookmark1",QString::number(itf.key()->editor->UserBookmark[0]));
-		    element.setAttribute("bookmark2",QString::number(itf.key()->editor->UserBookmark[1]));
-		    element.setAttribute("bookmark3",QString::number(itf.key()->editor->UserBookmark[2]));
+		    element.setAttribute("line",QString::number(itf.key()->editor().textCursor().blockNumber()));
+		    element.setAttribute("bookmark1",QString::number(itf.key()->editor().UserBookmark[0]));
+		    element.setAttribute("bookmark2",QString::number(itf.key()->editor().UserBookmark[1]));
+		    element.setAttribute("bookmark3",QString::number(itf.key()->editor().UserBookmark[2]));
 		    if ((!singlemode) && (MasterName==docname)) 		    element.setAttribute("master","true");
 		    else element.setAttribute("master","false");
 		    if (itf.key()==currentEditorView()) element.setAttribute("hasfocus","true");
@@ -10870,9 +10870,9 @@ while (!element.isNull())
 	fileOpenAndGoto(file,l+1,false);
 	if (currentEditorView() && getName()==file)
 	  {
-	  currentEditorView()->editor->UserBookmark[0]=b1;
-	  currentEditorView()->editor->UserBookmark[1]=b2;
-	  currentEditorView()->editor->UserBookmark[2]=b3;
+	  currentEditorView()->editor().UserBookmark[0]=b1;
+	  currentEditorView()->editor().UserBookmark[1]=b2;
+	  currentEditorView()->editor().UserBookmark[2]=b3;
 	  currentEditorView()->update();
 	  if (singlemode && ma) ToggleMode();
 	  }
@@ -10887,9 +10887,9 @@ if (!ofile.isEmpty())
     fileOpenAndGoto(ofile,l+1,true);
     if (currentEditorView() && getName()==ofile)
       {
-      currentEditorView()->editor->UserBookmark[0]=ob1;
-      currentEditorView()->editor->UserBookmark[1]=ob2;
-      currentEditorView()->editor->UserBookmark[2]=ob3;
+      currentEditorView()->editor().UserBookmark[0]=ob1;
+      currentEditorView()->editor().UserBookmark[1]=ob2;
+      currentEditorView()->editor().UserBookmark[2]=ob3;
       currentEditorView()->update();
       if (singlemode && oma) ToggleMode();
       }
@@ -10920,10 +10920,10 @@ for( itf = filenames.begin(); itf != filenames.end(); ++itf )
 	    {
 	    element=doc.createElement("document");
 	    element.setAttribute("file",docname);
-	    element.setAttribute("line",QString::number(itf.key()->editor->textCursor().blockNumber()));
-	    element.setAttribute("bookmark1",QString::number(itf.key()->editor->UserBookmark[0]));
-	    element.setAttribute("bookmark2",QString::number(itf.key()->editor->UserBookmark[1]));
-	    element.setAttribute("bookmark3",QString::number(itf.key()->editor->UserBookmark[2]));
+	    element.setAttribute("line",QString::number(itf.key()->editor().textCursor().blockNumber()));
+	    element.setAttribute("bookmark1",QString::number(itf.key()->editor().UserBookmark[0]));
+	    element.setAttribute("bookmark2",QString::number(itf.key()->editor().UserBookmark[1]));
+	    element.setAttribute("bookmark3",QString::number(itf.key()->editor().UserBookmark[2]));
 	    if ((!singlemode) && (MasterName==docname)) 		    element.setAttribute("master","true");
 	    else element.setAttribute("master","false");
 	    if (itf.key()==currentEditorView()) element.setAttribute("hasfocus","true");
@@ -10998,9 +10998,9 @@ while (!element.isNull())
 	fileOpenAndGoto(file,l+1,false);
       	if (currentEditorView() && getName()==file)
 	  {
-	  currentEditorView()->editor->UserBookmark[0]=b1;
-	  currentEditorView()->editor->UserBookmark[1]=b2;
-	  currentEditorView()->editor->UserBookmark[2]=b3;
+	  currentEditorView()->editor().UserBookmark[0]=b1;
+	  currentEditorView()->editor().UserBookmark[1]=b2;
+	  currentEditorView()->editor().UserBookmark[2]=b3;
 	  currentEditorView()->update();
 	  if (singlemode && ma) ToggleMode();
 	  }
@@ -11015,9 +11015,9 @@ if (!ofile.isEmpty())
     fileOpenAndGoto(ofile,l+1,true);
 	if (currentEditorView() && getName()==ofile)
 	  {
-	  currentEditorView()->editor->UserBookmark[0]=ob1;
-	  currentEditorView()->editor->UserBookmark[1]=ob2;
-	  currentEditorView()->editor->UserBookmark[2]=ob3;
+	  currentEditorView()->editor().UserBookmark[0]=ob1;
+	  currentEditorView()->editor().UserBookmark[1]=ob2;
+	  currentEditorView()->editor().UserBookmark[2]=ob3;
 	  currentEditorView()->update();
 	  if (singlemode && oma) ToggleMode();
 	  }
@@ -11128,7 +11128,7 @@ while (!t.atEnd())
 	code+= t.readLine()+"\n";
 	}
 templatefile.close();
-code.replace("#BASE#",currentEditorView()->editor->toPlainText());
+code.replace("#BASE#",currentEditorView()->editor().toPlainText());
 code.replace("#NEW#",sourceviewerWidget->editor->toPlainText());
 
 QString tempDir=QDir::tempPath();

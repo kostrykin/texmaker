@@ -38,13 +38,14 @@ public:
 
     ~LatexEditorView();
 
-    LatexEditor* editor;
-
     void changeSettings( const QFont& new_font, bool svn, bool line );
     void showFind();
     void showFindNext();
     void showGoto();
     void showReplace();
+
+    LatexEditor& editor();
+    const LatexEditor& editor() const;
 
 private slots:
 
@@ -55,6 +56,7 @@ private slots:
 private:
 
     QPalette lineNumberPalette;
+    LatexEditor* myEditor;
     MiniSplitter* const splitter;
     LineNumberWidget* lineNumberWidget;
     QStackedWidget* const Stack;
