@@ -1028,321 +1028,6 @@ connect(Act, SIGNAL(triggered()), this, SLOT(PreviousError()));
 Act = new QAction(getIcon(":/images/errornext.png"),tr("Next LaTeX Error"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(NextError()));
 
-latex1Menu = menuBar()->addMenu(tr("&LaTeX"));
-Act = new QAction("\\documentclass", this);
-Act->setData("\\documentclass[10pt]{}/21/0/\\documentclass[options]{class}");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\usepackage{}", this);
-Act->setData("\\usepackage{} /12/0/\\usepackage[options]{pkg}");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("AMS packages", this);
-Act->setData("\\usepackage{amsmath}\n\\usepackage{amsfonts}\n\\usepackage{amssymb}\n/0/3/The main American Mathematical Society packages");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\begin{document}", this);
-Act->setData("\\begin{document}\n\n\\end{document}/0/1/Text is allowed only between \\begin{document} and \\end{document}.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\author{}", this);
-Act->setData("\\author{}/8/0/\\author{names}\nThe \\author command declares the author(s), where names is a list of authors separated by \\and commands.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\title{}", this);
-Act->setData("\\title{}/7/0/\\title{text}\nThe \\title command declares text to be the title.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\maketitle", this);
-Act->setData("\\maketitle/10/0/This command generates a title on a separate title page\n- except in the article class, where the title normally goes at the top of the first page.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\tableofcontents", this);
-Act->setData("\\tableofcontents/16/0/Put this command where you want the table of contents to go");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-
-latex11Menu=latex1Menu->addMenu(tr("&Sectioning"));
-Act = new QAction("\\part", this);
-Act->setData("\\part");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\chapter", this);
-Act->setData("\\chapter");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\section", this);
-Act->setData("\\section");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\subsection", this);
-Act->setData("\\subsection");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\subsubsection", this);
-Act->setData("\\subsubsection");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\paragraph", this);
-Act->setData("\\paragraph");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-Act = new QAction("\\subparagraph", this);
-Act->setData("\\subparagraph");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertStruct()));
-latex11Menu->addAction(Act);
-
-latex12Menu=latex1Menu->addMenu(tr("&Environment"));
-Act = new QAction(getIcon(":/images/text_center.png"),"\\begin{center} [selection]", this);
-Act->setData("\\begin{center}\n/\n\\end{center}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/text_left.png"),"\\begin{flushleft} [selection]", this);
-Act->setData("\\begin{flushleft}\n/\n\\end{flushleft}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/text_right.png"),"\\begin{flushright}  [selection]", this);
-Act->setData("\\begin{flushright}\n/\n\\end{flushright}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{quote}  [selection]", this);
-Act->setData("\\begin{quote}\n/\n\\end{quote}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{quotation}  [selection]", this);
-Act->setData("\\begin{quotation}\n/\n\\end{quotation}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{verse}  [selection]", this);
-Act->setData("\\begin{verse}\n/\n\\end{verse}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{verbatim}  [selection]", this);
-Act->setData("\\begin{verbatim}\n/\n\\end{verbatim}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{table}  [selection]", this);
-Act->setData("\\begin{table}\n/\n\\caption{}\n\\end{table}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{figure}  [selection]", this);
-Act->setData("\\begin{figure}\n/\n\\caption{}\n\\end{figure}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{titlepage}  [selection]", this);
-Act->setData("\\begin{titlepage}\n/\n\\end{titlepage}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-Act = new QAction("\\begin{minipage}  [selection]", this);
-Act->setData("\\begin{minipage}{}\n/\n\\end{minipage}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex12Menu->addAction(Act);
-
-latex13Menu=latex1Menu->addMenu(tr("&List Environment"));
-Act = new QAction(getIcon(":/images/itemize.png"),"\\begin{itemize}", this);
-Act->setData("\\begin{itemize}\n\\item \n\\end{itemize}/6/1/The itemize environment produces a 'bulleted' list.\nEach item of an itemized list begins with an \\item command.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex13Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/enumerate.png"),"\\begin{enumerate}", this);
-Act->setData("\\begin{enumerate}\n\\item \n\\end{enumerate}/6/1/The enumerate environment produces a numbered list.\nEach item of an enumerated list begins with an \\item command.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex13Menu->addAction(Act);
-Act = new QAction("\\begin{description}", this);
-Act->setData("\\begin{description}\n\\item[]\n\\end{description}/6/1/The description environment is used to make labelled lists.\nEach item of the list begins with an \\item[label] command.\n");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex13Menu->addAction(Act);
-Act = new QAction("\\begin{list}", this);
-Act->setData("\\begin{list}{}{}\n\\item \n\\end{list}/13/0/\\begin{list}{label}{spacing}\nThe {label} argument is a piece of text that is inserted in a box to form the label.\nThe {spacing} argument contains commands to change the spacing parameters for the list.\nEach item of the list begins with an \\item command.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex13Menu->addAction(Act);
-
-Act = new QAction(getIcon(":/images/item.png"),"\\item", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_I);
-Act->setData("\\item/5/0/\\item[label] Hello");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex13Menu->addAction(Act);
-
-latex14Menu=latex1Menu->addMenu(tr("Font St&yles"));
-Act = new QAction(getIcon(":/images/text_italic.png"),"\\textit - Italics  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::Key_I);
-Act->setData("\\textit{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction("\\textsl - Slanted  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_S);
-Act->setData("\\textsl{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/text_bold.png"),"\\textbf - Boldface  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::Key_B);
-Act->setData("\\textbf{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction("\\texttt - Typewriter  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_T);
-Act->setData("\\texttt{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction("\\textsc - Small caps  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_C);
-Act->setData("\\textsc{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction("\\textsf - Sans Serif  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_A);
-Act->setData("\\textsf{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/text_emphasis.png"),"\\emph - Emphasis  [selection]", this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_E);
-Act->setData("\\emph{/}/6/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex14Menu->addAction(Act);
-
-latex15Menu=latex1Menu->addMenu(tr("&Tabular Environment"));
-Act = new QAction("\\begin{tabbing}", this);
-Act->setData("\\begin{tabbing}\n\n\\end{tabbing}/0/1/\\begin{tabbing}\ntext \\= more text \\= still more text \\= last text \\\\\nsecond row \\>  \\> more \\\\\n\\end{tabbing}");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-Act = new QAction("\\begin{tabular}", this);
-Act->setData("\\begin{tabular}{}\n\n\\end{tabular}/16/0/\\begin{tabular}[pos]{cols}\ncolumn 1 entry & column 2 entry ... & column n entry \\\\\n...\n\\end{tabular}");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-Act = new QAction("\\multicolumn", this);
-Act->setData("\\multicolumn{}{}{} /13/0/\\multicolumn{cols}{pos}{text}\ncol, specifies the number of columns to span.\npos specifies the formatting of the entry: c for centred, l for flushleft, r for flushright.\ntext specifies what text is to make up the entry.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-Act = new QAction("\\hline", this);
-Act->setData("\\hline /7/0/The \\hline command draws a horizontal line the width of the table.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-Act = new QAction("\\vline", this);
-Act->setData("\\vline /7/0/The \\vline command draws a vertical line extending the full height and depth of its row.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-Act = new QAction("\\cline", this);
-Act->setData("\\cline{-} /7/0/The \\cline{i-j} command draws horizontal lines across the columns specified, beginning in column i and ending in column j");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex15Menu->addAction(Act);
-
-latex16Menu=latex1Menu->addMenu(tr("S&pacing"));
-Act = new QAction("\\newpage", this);
-Act->setData("\\newpage /9/0/The \\newpage command ends the current page");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-Act = new QAction("\\linebreak", this);
-Act->setData("\\linebreak /11/0/The \\linebreak command tells LaTeX to break the current line at the point of the command.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-Act = new QAction("\\pagebreak", this);
-Act->setData("\\pagebreak /11/0/The \\pagebreak command tells LaTeX to break the current page at the point of the command.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-Act = new QAction("\\bigskip", this);
-Act->setData("\\bigskip /9/0/The \\bigskip command adds a 'big' vertical space.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-Act = new QAction("\\medskip", this);
-Act->setData("\\medskip /9/0/The \\medskip command adds a 'medium' vertical space.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/newline.png"),"New line", this);
-Act->setData("\\\\\n/0/1/The \\newline command breaks the line right where it is.");
-Act->setShortcut(Qt::CTRL+Qt::Key_Return);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex16Menu->addAction(Act);
-
-latex17Menu=latex1Menu->addMenu(tr("International &Accents"));
-Act = new QAction(getIcon(":/images/accent1.png"),"\\'{}", this);
-Act->setData("\\'{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent2.png"),"\\`{}", this);
-Act->setData("\\`{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent3.png"),"\\^{}", this);
-Act->setData("\\^{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent4.png"),"\\\"{}", this);
-Act->setData("\\\"{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent5.png"),"\\~{}", this);
-Act->setData("\\~{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent6.png"),"\\={}", this);
-Act->setData("\\={}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent7.png"),"\\.{}", this);
-Act->setData("\\.{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent8.png"),"\\v{}", this);
-Act->setData("\\v{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent9.png"),"\\u{}", this);
-Act->setData("\\u{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-Act = new QAction(getIcon(":/images/accent10.png"),"\\H{}", this);
-Act->setData("\\H{}/3/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex17Menu->addAction(Act);
-
-latex18Menu=latex1Menu->addMenu(tr("International &Quotes"));
-Act = new QAction("French Quotes  [selection]", this);
-Act->setData("\\og / \\fg{}/4/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex18Menu->addAction(Act);
-Act = new QAction("German Quotes  [selection]", this);
-Act->setData("\\glqq /\\grqq/6/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex18Menu->addAction(Act);
-Act = new QAction("Polish Quotes  [selection]", this);
-Act->setData("\\quotedblbase /\\textquotedblright/14/0/ ");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-latex18Menu->addAction(Act);
-
-Act = new QAction("\\includegraphics{file}", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertImage()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\include{file}", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertInclude()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\input{file}", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertInput()));
-latex1Menu->addAction(Act);
-latex1Menu->addSeparator();
-
-Act = new QAction("\\label{}", this);
-Act->setData("\\label{} /7/0/\\label{key}");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\cite{}", this);
-Act->setData("\\cite{} /6/0/\\cite{ref} :\nThis command generates an in-text citation to the reference associated with the ref entry in the bib file");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\footnote{}", this);
-Act->setData("\\footnote{} /10/0/\\footnote[number]{text}\nThe \\footnote command places the numbered footnote text at the bottom of the current page.");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\bibliographystyle{}", this);
-Act->setData("\\bibliographystyle{} /19/0/The argument to \\bibliographystyle refers to a file style.bst, which defines how your citations will look");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-latex1Menu->addAction(Act);
-Act = new QAction("\\bibliography{}", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertBib()));
-latex1Menu->addAction(Act);
-
-Act = new QAction("\\addbibresource{}", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertBibLatex()));
-latex1Menu->addAction(Act);
-
 math1Menu = menuBar()->addMenu(tr("&Math"));
 Act = new QAction(tr("Inline math mode $...$"), this);
 Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_M);
@@ -2012,7 +1697,6 @@ helpMenu->addAction(Act);
 QList<QAction *> listaction;
 KeysMap::Iterator its;
 bool hasNextPrev=false;
-bool hasQuote=false;
 bool hasTools=false;
 bool hasEdit=false;
 
@@ -2022,15 +1706,6 @@ if (shortcuts.isEmpty())
 	listaction << toolMenu->actions();
 	listaction << editMenu->actions();
 	listaction << NextDocAct << PrevDocAct;
-	listaction << latex1Menu->actions();
-	listaction << latex11Menu->actions();
-	listaction << latex12Menu->actions();
-	listaction << latex13Menu->actions();
-	listaction << latex14Menu->actions();
-	listaction << latex15Menu->actions();
-	listaction << latex16Menu->actions();
-	listaction << latex17Menu->actions();
-	listaction << latex18Menu->actions();
 	listaction << math1Menu->actions();
 	listaction << math11Menu->actions();
 	listaction << math12Menu->actions();
@@ -2053,7 +1728,6 @@ else
   for( its = shortcuts.begin(); its != shortcuts.end(); ++its )
       {
       if (its.key()=="Next") hasNextPrev=true;
-      if (its.key().contains("\\glqq / \\grqq")) hasQuote=true;
       if (its.key()=="LaTeX") hasTools=true;
       if (its.key()=="Comment") hasEdit=true;
       }
@@ -2063,13 +1737,6 @@ else
       actionstext.insert(NextDocAct->data().toString(),NextDocAct->text());
       shortcuts.insert(PrevDocAct->data().toString(),PrevDocAct->shortcut().toString(QKeySequence::PortableText));
       actionstext.insert(PrevDocAct->data().toString(),PrevDocAct->text());
-      }
-  if (!hasQuote) 
-      {
-      shortcuts.insert(latex18Menu->actions().at(0)->data().toString(),latex18Menu->actions().at(0)->shortcut().toString(QKeySequence::PortableText));
-      actionstext.insert(latex18Menu->actions().at(0)->data().toString(),latex18Menu->actions().at(0)->text());
-      shortcuts.insert(latex18Menu->actions().at(1)->data().toString(),latex18Menu->actions().at(1)->shortcut().toString(QKeySequence::PortableText));
-      actionstext.insert(latex18Menu->actions().at(1)->data().toString(),latex18Menu->actions().at(1)->text());
       }
   if (!hasTools) 
       {
@@ -5603,86 +5270,6 @@ if ( stDlg->exec() )
 	tag +=stDlg->ui.TitlelineEdit->text();
 	tag +=QString("}\n");
 	InsertTag(tag,0,1);
-	}
-}
-
-void Texmaker::InsertImage()
-{
-if ( !currentEditorView() )	return;
-QString tag;
-QString currentDir=QDir::homePath();
-QString finame;
-if (singlemode) {finame=getName();}
-else {finame=MasterName;}
-QFileInfo fi(finame);
-if (!finame.startsWith("untitled")) currentDir=fi.absolutePath();
-QDir rootdir=fi.dir();
-GraphicFileChooser *sfDlg = new GraphicFileChooser(this,tr("Select an image File"));
-sfDlg->setFilter("Graphic files (*.eps *.pdf *.png *.jpeg *.jpg *.tiff);;All files (*.*)");
-sfDlg->setDir(currentDir);
-if (sfDlg->exec() )
-	{
-	QString fn=sfDlg->fileName();
-	QFileInfo fi(rootdir.relativeFilePath(fn));
-	if (!sfDlg->ui.moreButton->isChecked()) InsertTag("\\includegraphics[scale=1]{"+fi.filePath()+"} ",26,0);
-	else
-	  {
-	  tag = "\\begin{figure}["+sfDlg->ui.lineEditPlacement->text()+"]\n";
-	  if(sfDlg->ui.comboBoxCaption->currentIndex()==0) tag+="\\caption{"+sfDlg->ui.lineEditCaption->text()+"}\n";
-	  if (sfDlg->ui.checkBoxCentering->isChecked()) tag+="\\centering\n";
-	  tag+="\\includegraphics[scale=1]{"+fi.filePath()+"}\n";
-	  if(sfDlg->ui.comboBoxCaption->currentIndex()==1) tag+="\\caption{"+sfDlg->ui.lineEditCaption->text()+"}\n";
-	  tag+="\\end{figure}\n";
-	  InsertTag(tag,0,4);
-	  }
-	}
-}
-
-void Texmaker::InsertInclude()
-{
-if ( !currentEditorView() )	return;
-QString currentDir=QDir::homePath();
-QString finame;
-if (singlemode) {finame=getName();}
-else {finame=MasterName;}
-QFileInfo fi(finame);
-if (!finame.startsWith("untitled")) currentDir=fi.absolutePath();
-QDir rootdir=fi.dir();
-FileChooser *sfDlg = new FileChooser(this,tr("Select a File"));
-sfDlg->setFilter("TeX files (*.tex);;All files (*.*)");
-sfDlg->setDir(currentDir);
-if (sfDlg->exec() )
-	{
-	QString fn=sfDlg->fileName();
-	QFileInfo fi(rootdir.relativeFilePath(fn));
-	QString suff=fi.suffix();
-	QString name=fi.filePath();
-	name=name.left(name.length()-suff.length()-1);
-	InsertTag("\\include{"+name+"}",9,0);
-	}
-}
-
-void Texmaker::InsertInput()
-{
-if ( !currentEditorView() )	return;
-QString currentDir=QDir::homePath();
-QString finame;
-if (singlemode) {finame=getName();}
-else {finame=MasterName;}
-QFileInfo fi(finame);
-if (!finame.startsWith("untitled")) currentDir=fi.absolutePath();
-QDir rootdir=fi.dir();
-FileChooser *sfDlg = new FileChooser(this,tr("Select a File"));
-sfDlg->setFilter("TeX files (*.tex);;All files (*.*)");
-sfDlg->setDir(currentDir);
-if (sfDlg->exec() )
-	{
-	QString fn=sfDlg->fileName();
-	QFileInfo fi(rootdir.relativeFilePath(fn));
-	QString suff=fi.suffix();
-	QString name=fi.filePath();
-	name=name.left(name.length()-suff.length()-1);
-	InsertTag("\\input{"+name+"}",7,0);
 	}
 }
 
@@ -10068,15 +9655,6 @@ QList<QAction *> listaction;
 listaction << toolMenu->actions();
 listaction << editMenu->actions();
 listaction << NextDocAct << PrevDocAct;
-listaction << latex1Menu->actions();
-listaction << latex11Menu->actions();
-listaction << latex12Menu->actions();
-listaction << latex13Menu->actions();
-listaction << latex14Menu->actions();
-listaction << latex15Menu->actions();
-listaction << latex16Menu->actions();
-listaction << latex17Menu->actions();
-listaction << latex18Menu->actions();
 listaction << math1Menu->actions();
 listaction << math11Menu->actions();
 listaction << math12Menu->actions();

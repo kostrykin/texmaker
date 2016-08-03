@@ -129,7 +129,6 @@ QHBoxLayout *OutputLayoutH, *LeftPanelLayout, *CentralLayout;
 QTableWidget *OutputTableWidget;
 //menu-toolbar
 QMenu *fileMenu, *recentMenu, *editMenu, *toolMenu, *sessionMenu;
-QMenu *latex1Menu, *latex11Menu, *latex12Menu, *latex13Menu, *latex14Menu, *latex15Menu, *latex16Menu, *latex17Menu, *latex18Menu ;
 QMenu *math1Menu, *math11Menu, *math12Menu, *math13Menu, *math14Menu;
 QMenu *wizardMenu;
 QMenu *bibMenu, *bibtexMenu, *biblatexMenu;
@@ -308,9 +307,6 @@ void InsertBib();
 void InsertBibLatex();
 void InsertStruct();
 void InsertStructFromString(const QString& text);
-void InsertImage();
-void InsertInclude();
-void InsertInput();
 
 void InsertBib1();
 void InsertBib2();
