@@ -137,7 +137,6 @@ QMenu *user1Menu, *user11Menu, *user12Menu;
 QMenu *viewMenu;
 QMenu *optionsMenu, *translationMenu, *appearanceMenu, *settingsMenu, *scriptMenu;
 QMenu *helpMenu;
-QMenu *sectionMenu, *sizeMenu, *refMenu;
 
 QToolBar *fileToolBar, *editToolBar, *runToolBar, /* *formatToolBar ,*/ *logToolBar, *LeftPanelToolBar,*LeftPanelToolBarBis, *centralToolBar, *centralToolBarBis;
 QAction *recentFileActs[10], *ToggleAct, *StopAct, *UndoAct, *RedoAct, *SaveAct, *CutAct, *CopyAct,*PasteAct, *ToggleDocAct, *ViewStructurePanelAct, *ViewLogPanelAct, *ViewPdfPanelAct, *ViewSourcePanelAct, *FullScreenAct, *NextDocAct, *PrevDocAct, *ViewOpenedFilesPanelAct ;
@@ -145,11 +144,6 @@ QAction *recentFileActs[10], *ToggleAct, *StopAct, *UndoAct, *RedoAct, *SaveAct,
 QAction *relationAct, *arrowAct, *miscAct, *delimAct, *greekAct, *usedAct, *favAct, *leftrightAct, *pstricksAct, *mpAct, *tikzAct, *asyAct, *userpanelAct;
 bool showPstricks, showMp, showTikz, showAsy;
 QAction *viewPstricksAct, *viewMpAct, *viewTikzAct, *viewAsyAct;
-
-QAction *emphasisAct, *newlineAct, *mathmodeAct, *indiceAct, *puissanceAct, *smallfracAct, *dfracAct, *racineAct;
-QAction *showemphasisAct, *shownewlineAct, *showmathmodeAct, *showindiceAct, *showpuissanceAct, *showsmallfracAct, *showdfracAct, *showracineAct;
-bool showEmphasis, showNewline, showMathmode, showIndice, showPuissance, showSmallfrac, showDfrac, showRacine;
-
 
 QComboBox *comboCompil, *comboView, *comboFiles;
 QLabel *stat1, *stat2, *stat3, *titleLeftPanel, *posLabel;
@@ -375,10 +369,6 @@ void InsertRef();
 void InsertPageRef();
 void SizeCommand();
 
-void ShowSectionMenu();
-void ShowRefMenu();
-void ShowSizeMenu();
-
 void QuickTabular();
 void QuickArray();
 void QuickTabbing();
@@ -500,19 +490,10 @@ void addIncludeFiles(QString param);
 void loadIncludeFiles(QString param, QString extension);
 void showCursorPos(int li, int col);
 void customContentsMenuStructure( const QPoint &pos );
-void customContentsMenuMain( const QPoint &pos );
 void TogglePstricks();
 void ToggleMetapost();
 void ToggleTikz();
 void ToggleAsymptote();
-void ToggleEmphasis();
-void ToggleNewline();
-void ToggleMathmode();
-void ToggleIndice();
-void TogglePuissance();
-void ToggleSmallfrac();
-void ToggleDfrac();
-void ToggleRacine();
 void splitter2Changed();
 
 void SaveSession();

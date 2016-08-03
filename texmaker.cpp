@@ -539,195 +539,6 @@ centralFrame->setFrameShape(QFrame::NoFrame);
 centralFrame->setFrameShadow(QFrame::Plain);
 
 
-centralToolBar=new QToolBar("LogToolBar",centralFrame);
-centralToolBar->setFloatable(false);
-centralToolBar->setOrientation(Qt::Vertical);
-centralToolBar->setMovable(false);
-centralToolBar->setIconSize(QSize(16,16 ));
-
-
-sectionMenu=new QMenu(this);
-Act = new QAction("part", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("chapter", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("section", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("subsection", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("subsubsection", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("paragraph", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-Act = new QAction("subparagraph", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SectionCommand()));
-sectionMenu->addAction(Act);
-
-refMenu=new QMenu(this);
-Act = new QAction("label", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-Act = new QAction("ref", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-Act = new QAction("pageref", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-Act = new QAction("index", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-Act = new QAction("cite", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-Act = new QAction("footnote", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(OtherCommand()));
-refMenu->addAction(Act);
-
-sizeMenu=new QMenu(this);
-Act = new QAction("tiny", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("scriptsize", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("footnotesize", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("small", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("normalsize", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("large", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("Large", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("LARGE", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("huge", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-Act = new QAction("Huge", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SizeCommand()));
-sizeMenu->addAction(Act);
-
-Act = new QAction(getIcon(":/images/sectioning.png"),"part/chapter/section...", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(ShowSectionMenu()));
-centralToolBar->addAction(Act);
-Act = new QAction(getIcon(":/images/ref.png"),"Label/ref/cite...", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(ShowRefMenu()));
-centralToolBar->addAction(Act);
-Act = new QAction(getIcon(":/images/size.png"),"tiny/small/large...", this);
-connect(Act, SIGNAL(triggered()), this, SLOT(ShowSizeMenu()));
-centralToolBar->addAction(Act);
-
-centralToolBar->addSeparator();
-
-Act = new QAction(getIcon(":/images/text_bold.png"),tr("Bold"), this);
-Act->setData("\\textbf{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-centralToolBar->addAction(Act);
-
-Act = new QAction(getIcon(":/images/text_italic.png"),tr("Italic"), this);
-Act->setData("\\textit{/}/8/0");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-centralToolBar->addAction(Act);
-
-emphasisAct = new QAction(getIcon(":/images/text_emphasis.png"),"Emphasis", this);
-emphasisAct->setData("\\emph{/}/6/0");
-connect(emphasisAct, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-if (showEmphasis) centralToolBar->addAction(emphasisAct);
-
-Act = new QAction(getIcon(":/images/text_left.png"),tr("Left"), this);
-Act->setData("\\begin{flushleft}\n/\n\\end{flushleft}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-centralToolBar->addAction(Act);
-
-Act = new QAction(getIcon(":/images/text_center.png"),tr("Center"), this);
-Act->setData("\\begin{center}\n/\n\\end{center}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-centralToolBar->addAction(Act);
-
-Act = new QAction(getIcon(":/images/text_right.png"),tr("Right"), this);
-Act->setData("\\begin{flushright}\n/\n\\end{flushright}/0/1");
-connect(Act, SIGNAL(triggered()), this, SLOT(InsertWithSelectionFromAction()));
-centralToolBar->addAction(Act);
-centralToolBar->addSeparator();
-
-newlineAct = new QAction(getIcon(":/images/newline.png"),tr("New line"), this);
-newlineAct->setData("\\\\\n/0/1/The \\newline command breaks the line right where it is. It can only be used in paragraph mode.");
-connect(newlineAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showNewline) centralToolBar->addAction(newlineAct);
-
-centralToolBar->addSeparator();
-
-mathmodeAct = new QAction(getIcon(":/images/mathmode.png"),"$...$", this);
-mathmodeAct->setData("$  $/2/0/The math environment can be used in both paragraph and LR mode");
-connect(mathmodeAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showMathmode) centralToolBar->addAction(mathmodeAct);
-
-indiceAct = new QAction(getIcon(":/images/indice.png"),"_{} - subscript", this);
-indiceAct->setData("_{}/2/0/ ");
-connect(indiceAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showIndice) centralToolBar->addAction(indiceAct);
-
-puissanceAct = new QAction(getIcon(":/images/puissance.png"),"^{} - superscript", this);
-puissanceAct->setData("^{}/2/0/ ");
-connect(puissanceAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showPuissance) centralToolBar->addAction(puissanceAct);
-
-smallfracAct = new QAction(getIcon(":/images/smallfrac.png"),"\\frac{}{}", this);
-smallfracAct->setData("\\frac{}{}/6/0/ ");
-connect(smallfracAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showSmallfrac) centralToolBar->addAction(smallfracAct);
-
-dfracAct = new QAction(getIcon(":/images/dfrac.png"),"\\dfrac{}{}", this);
-dfracAct->setData("\\dfrac{}{}/7/0/ ");
-connect(dfracAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showDfrac) centralToolBar->addAction(dfracAct);
-
-racineAct = new QAction(getIcon(":/images/racine.png"),"\\sqrt{}", this);
-racineAct->setData("\\sqrt{}/6/0/ ");
-connect(racineAct, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
-if (showRacine) centralToolBar->addAction(racineAct);
-
-showemphasisAct = new QAction("Emphasis", this);
-showemphasisAct->setCheckable(true);
-connect(showemphasisAct, SIGNAL(triggered()), this, SLOT(ToggleEmphasis()));
-shownewlineAct = new QAction(tr("New line"), this);
-shownewlineAct->setCheckable(true);
-connect(shownewlineAct, SIGNAL(triggered()), this, SLOT(ToggleNewline()));
-showmathmodeAct = new QAction("$...$", this);
-showmathmodeAct->setCheckable(true);
-connect(showmathmodeAct, SIGNAL(triggered()), this, SLOT(ToggleMathmode()));
-showindiceAct = new QAction("_{} - subscript", this);
-showindiceAct->setCheckable(true);
-connect(showindiceAct, SIGNAL(triggered()), this, SLOT(ToggleIndice()));
-showpuissanceAct = new QAction("^{} - superscript", this);
-showpuissanceAct->setCheckable(true);
-connect(showpuissanceAct, SIGNAL(triggered()), this, SLOT(TogglePuissance()));
-showsmallfracAct = new QAction("\\frac{}{}", this);
-showsmallfracAct->setCheckable(true);
-connect(showsmallfracAct, SIGNAL(triggered()), this, SLOT(ToggleSmallfrac()));
-showdfracAct = new QAction("\\dfrac{}{}", this);
-showdfracAct->setCheckable(true);
-connect(showdfracAct, SIGNAL(triggered()), this, SLOT(ToggleDfrac()));
-showracineAct = new QAction("\\sqrt{}", this);
-showracineAct->setCheckable(true);
-connect(showracineAct, SIGNAL(triggered()), this, SLOT(ToggleRacine()));
-centralToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-connect(centralToolBar, SIGNAL( customContextMenuRequested( const QPoint & )), this, SLOT( customContentsMenuMain( const QPoint & )));
-
 QFrame *centralFrameBis=new QFrame(this);
 centralFrameBis->setLineWidth(0);
 centralFrameBis->setFrameShape(QFrame::NoFrame);
@@ -742,7 +553,6 @@ centralToolBarBis->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
 
 LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
 LeftPanelToolBarBis->setMaximumHeight(centralToolBarBis->height());
-//centralToolBarBis->setStyle(QStyleFactory::create("Plastique"));
 
 ToggleDocAct=new QAction(getIcon(":/images/toggle.png"),tr("Toggle between the master document and the current document")+" (CTRL+SHIFT+F2)", this);
 ToggleDocAct->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_F2);
@@ -796,7 +606,6 @@ connect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure(
 CentralLayout= new QHBoxLayout(centralFrame);
 CentralLayout->setSpacing(0);
 CentralLayout->setMargin(0);
-CentralLayout->addWidget(centralToolBar);
 CentralLayout->addWidget(EditorView);
 
 CentralLayoutBis= new QVBoxLayout(centralFrameBis);
@@ -899,8 +708,6 @@ splitter2Changed();
 
 
 LeftPanelToolBarBis->setMinimumHeight(centralToolBarBis->height());
-sourceviewerWidget->centralToolBar->setMinimumHeight(centralToolBarBis->height());
-sourceviewerWidget->centralToolBar->setMaximumHeight(centralToolBarBis->height());
 stat1->setText(QString(" %1 ").arg(tr("Normal Mode")));
 //stat2->setText(QString(" %1 ").arg(tr("Ready")));
 stat3->setText(QString(" %1 ").arg(input_encoding));
@@ -4261,14 +4068,6 @@ showPstricks=config->value( "Show/Pstricks",true).toBool();
 showMp=config->value( "Show/Metapost",true).toBool();
 showTikz=config->value( "Show/Tikz",true).toBool();
 showAsy=config->value( "Show/Asymptote",true).toBool();
-showEmphasis=config->value( "Show/Emphasis",true).toBool();
-showNewline=config->value( "Show/Newline",true).toBool();
-showMathmode=config->value( "Show/Mathmode",true).toBool();
-showIndice=config->value( "Show/Indice",true).toBool();
-showPuissance=config->value( "Show/Puissance",true).toBool();
-showSmallfrac=config->value( "Show/Smallfrac",true).toBool();
-showDfrac=config->value( "Show/Dfrac",true).toBool();
-showRacine=config->value( "Show/Racine",true).toBool();
 
 extra_path=config->value("Tools/ExtraPath","").toString();
 useoutputdir=config->value( "Tools/OutputDir",false).toBool();
@@ -4824,15 +4623,6 @@ config.setValue( "Show/Pstricks",showPstricks);
 config.setValue( "Show/Metapost",showMp);
 config.setValue( "Show/Tikz",showTikz);
 config.setValue( "Show/Asymptote",showAsy);
-
-config.setValue( "Show/Emphasis",showEmphasis);
-config.setValue( "Show/Newline",showNewline);
-config.setValue( "Show/Mathmode",showMathmode);
-config.setValue( "Show/Indice",showIndice);
-config.setValue( "Show/Puissance",showPuissance);
-config.setValue( "Show/Smallfrac",showSmallfrac);
-config.setValue( "Show/Dfrac",showDfrac);
-config.setValue( "Show/Racine",showRacine);
 
 config.setValue("Tools/ExtraPath",extra_path);
 config.setValue("Tools/OutputDir",useoutputdir);
@@ -7646,21 +7436,6 @@ if (text=="Huge")
 	else InsertWithSelectionFromString("\\begin{Huge}\n/\n\\end{Huge}/12/0");
 	return;
 	}
-}
-void Texmaker::ShowSectionMenu()
-{
-QAction *action = qobject_cast<QAction *>(sender());
-sectionMenu->exec(centralToolBar->widgetForAction(action)->mapToGlobal(QPoint(centralToolBar->width(),0)));  
-}
-void Texmaker::ShowRefMenu()
-{
-QAction *action = qobject_cast<QAction *>(sender());
-refMenu->exec(centralToolBar->widgetForAction(action)->mapToGlobal(QPoint(centralToolBar->width(),0)));    
-}
-void Texmaker::ShowSizeMenu()
-{
-QAction *action = qobject_cast<QAction *>(sender());
-sizeMenu->exec(centralToolBar->widgetForAction(action)->mapToGlobal(QPoint(centralToolBar->width(),0)));      
 }
 
 ///////////////TOOLS////////////////////
@@ -11260,118 +11035,6 @@ if (showAsy)
   }
 else if (!LeftPanelToolBar->actions().contains(asyAct)) LeftPanelToolBar->addAction(asyAct);
 showAsy=!showAsy;
-}
-
-void Texmaker::customContentsMenuMain( const QPoint &pos )
-{
-QMenu *menu = QMainWindow::createPopupMenu();
-menu->addSeparator();
-showemphasisAct->setChecked(showEmphasis);
-menu->addAction(showemphasisAct);
-
-shownewlineAct->setChecked(showNewline);
-menu->addAction(shownewlineAct);
-
-showmathmodeAct->setChecked(showMathmode);
-menu->addAction(showmathmodeAct);
-
-showindiceAct->setChecked(showIndice);
-menu->addAction(showindiceAct);
-
-showpuissanceAct->setChecked(showPuissance);
-menu->addAction(showpuissanceAct);
-
-showsmallfracAct->setChecked(showSmallfrac);
-menu->addAction(showsmallfracAct);
-
-showdfracAct->setChecked(showDfrac);
-menu->addAction(showdfracAct);
-
-showracineAct->setChecked(showRacine);
-menu->addAction(showracineAct);
-
-QPoint globalPos = centralToolBar->mapToGlobal(pos);
-menu->exec( globalPos );
-}
-
-void Texmaker::ToggleEmphasis()
-{
-if (showEmphasis)
-  {
-  if (centralToolBar->actions().contains(emphasisAct)) centralToolBar->removeAction(emphasisAct);
-  }
-else if (!centralToolBar->actions().contains(emphasisAct)) centralToolBar->addAction(emphasisAct);
-showEmphasis=!showEmphasis;
-}
-
-void Texmaker::ToggleNewline()
-{
-if (showNewline)
-  {
-  if (centralToolBar->actions().contains(newlineAct)) centralToolBar->removeAction(newlineAct);
-  }
-else if (!centralToolBar->actions().contains(newlineAct)) centralToolBar->addAction(newlineAct);
-showNewline=!showNewline;
-}
-
-void Texmaker::ToggleMathmode()
-{
-if (showMathmode)
-  {
-  if (centralToolBar->actions().contains(mathmodeAct)) centralToolBar->removeAction(mathmodeAct);
-  }
-else if (!centralToolBar->actions().contains(mathmodeAct)) centralToolBar->addAction(mathmodeAct);
-showMathmode=!showMathmode;
-}
-
-void Texmaker::ToggleIndice()
-{
-if (showIndice)
-  {
-  if (centralToolBar->actions().contains(indiceAct)) centralToolBar->removeAction(indiceAct);
-  }
-else if (!centralToolBar->actions().contains(indiceAct)) centralToolBar->addAction(indiceAct);
-showIndice=!showIndice;
-}
-
-void Texmaker::TogglePuissance()
-{
-if (showPuissance)
-  {
-  if (centralToolBar->actions().contains(puissanceAct)) centralToolBar->removeAction(puissanceAct);
-  }
-else if (!centralToolBar->actions().contains(puissanceAct)) centralToolBar->addAction(puissanceAct);
-showPuissance=!showPuissance;
-}
-
-void Texmaker::ToggleSmallfrac()
-{
-if (showSmallfrac)
-  {
-  if (centralToolBar->actions().contains(smallfracAct)) centralToolBar->removeAction(smallfracAct);
-  }
-else if (!centralToolBar->actions().contains(smallfracAct)) centralToolBar->addAction(smallfracAct);
-showSmallfrac=!showSmallfrac;
-}
-
-void Texmaker::ToggleDfrac()
-{
-if (showDfrac)
-  {
-  if (centralToolBar->actions().contains(dfracAct)) centralToolBar->removeAction(dfracAct);
-  }
-else if (!centralToolBar->actions().contains(dfracAct)) centralToolBar->addAction(dfracAct);
-showDfrac=!showDfrac;
-}
-
-void Texmaker::ToggleRacine()
-{
-if (showRacine)
-  {
-  if (centralToolBar->actions().contains(racineAct)) centralToolBar->removeAction(racineAct);
-  }
-else if (!centralToolBar->actions().contains(racineAct)) centralToolBar->addAction(racineAct);
-showRacine=!showRacine;
 }
 
 void Texmaker::splitter2Changed()
