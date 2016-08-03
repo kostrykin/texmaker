@@ -95,7 +95,6 @@ HEADERS	+= texmaker.h \
 	unicodedialog.h \
 	unicodeview.h \
 	quickbeamerdialog.h \
-	svnhelper.h \
 	hunspell/affentry.hxx \
 	hunspell/affixmgr.hxx \
 	hunspell/atypes.hxx \
@@ -206,7 +205,6 @@ SOURCES	+= main.cpp \
 	unicodedialog.cpp \
 	unicodeview.cpp \
 	quickbeamerdialog.cpp \
-	svnhelper.cpp \
 	hunspell/affentry.cxx \
 	hunspell/affixmgr.cxx \
 	hunspell/csutil.cxx \

@@ -18,7 +18,7 @@
 #include <QTextBlock>
 
 
-LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, bool svn, bool line, const QList< QColor >& edcolors
+LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, bool line, const QList< QColor >& edcolors
                                 , const QList< QColor >& hicolors, bool inlinespelling, const QString& ignoredWords, Hunspell* const spellChecker
                                 , bool tabspaces, int tabwidth, const QKeySequence& viewfocus, const QString& name, const QStringList& ulist )
     : QWidget( parent )
@@ -51,7 +51,7 @@ LatexEditorView::LatexEditorView( QWidget* const parent, const QFont& efont, boo
     this->lineNumberPalette.setColor( QPalette::Window, edcolors.at( 1 ) );
 
     myEditor = new LatexEditor( frame, efont, edcolors, hicolors, inlinespelling, ignoredWords, spellChecker, tabspaces, tabwidth, viewfocus, name, ulist );
-    lineNumberWidget = new LineNumberWidget( myEditor, frame, svn );
+    lineNumberWidget = new LineNumberWidget( myEditor, frame );
     lineNumberWidget->setFont( efont );
     lineNumberWidget->setPalette( this->lineNumberPalette );
     lineNumberWidget->setAutoFillBackground( true );
@@ -126,14 +126,13 @@ void LatexEditorView::setLineNumberWidgetVisible( bool b )
     }
 }
 
-void LatexEditorView::changeSettings( const QFont& new_font, bool svn, bool line )
+void LatexEditorView::changeSettings( const QFont& new_font, bool line )
 {
     myEditor->changeFont( new_font );
     lineNumberWidget->setFont( new_font );
 
     const QFontMetrics fm( new_font );
     lineNumberWidget->setFixedWidth( fm.width( "00000" ) + 32 );
-    lineNumberWidget->setSvn( svn );
     setLineNumberWidgetVisible( line );
 }
 

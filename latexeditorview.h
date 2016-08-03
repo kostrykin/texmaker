@@ -32,13 +32,13 @@ class LatexEditorView : public QWidget  {
 
 public: 
 
-    LatexEditorView( QWidget* const parent, const QFont& efont, bool svn, bool line, const QList< QColor >& edcolors, const QList< QColor >& hicolors
+    LatexEditorView( QWidget* const parent, const QFont& efont, bool line, const QList< QColor >& edcolors, const QList< QColor >& hicolors
                    , bool inlinespelling = false, const QString& ignoredWords = "", Hunspell* const spellChecker = 0, bool tabspaces = false, int tabwidth = 4
                    , const QKeySequence& viewfocus = QKeySequence( "Ctrl+Space" ), const QString& name = "", const QStringList& ulist = QStringList());
 
     ~LatexEditorView();
 
-    void changeSettings( const QFont& new_font, bool svn, bool line );
+    void changeSettings( const QFont& new_font, bool line );
     void showFind();
     void showFindNext();
     void showGoto();

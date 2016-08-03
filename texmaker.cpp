@@ -92,7 +92,6 @@
 #include "exportdialog.h"
 #include "versiondialog.h"
 #include "unicodedialog.h"
-#include "svnhelper.h"
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include "x11fontdialog.h"
@@ -2605,7 +2604,7 @@ if (pos > -1)
   else spellChecker=0;
   }  
   
-LatexEditorView *edit = new LatexEditorView(0,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),f,userTagsList);
+LatexEditorView *edit = new LatexEditorView(0,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),f,userTagsList);
 EditorView->addWidget( edit);
 ComboFilesInsert(f);
 disconnect(EditorView, SIGNAL( currentChanged( int ) ), this, SLOT(UpdateStructure()) );
@@ -2622,11 +2621,6 @@ filenames.remove( edit);
 filenames.insert( edit, f );
 
 edit->editor().resetRevisions();
-if(svnEnable) 
-{
-connect(new SvnHelper(f,svnPath), SIGNAL(uncommittedLines(QList<int>)), &edit->editor(), SLOT(setUncommittedLines(QList<int>)));
-edit->editor().viewport()->update();
-}
 
 edit->editor().document()->setModified(false);
 connect( edit->editor().document(), SIGNAL(modificationChanged(bool)), this, SLOT(NewDocumentStatus(bool)));
@@ -2717,7 +2711,7 @@ if (currentEditorView())
 
 void Texmaker::fileNew()
 {
-    LatexEditorView* const view = new LatexEditorView( 0, EditorFont, svnEnable, showline, edcolors(), hicolors(), inlinespellcheck
+    LatexEditorView* const view = new LatexEditorView( 0, EditorFont, showline, edcolors(), hicolors(), inlinespellcheck
                                                      , spell_ignored_words, spellChecker, tabspaces, tabwidth, QKeySequence( keyToggleFocus )
                                                      , "untitled" + QString::number( untitled_id ), userTagsList );
     view->editor().setReadOnly( false );
@@ -2785,7 +2779,7 @@ if ( !file.open( QIODevice::ReadOnly ) )
 	return;
 	}
 lastTemplate=fn;
-LatexEditorView *edit = new LatexEditorView(0,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),fn,userTagsList);
+LatexEditorView *edit = new LatexEditorView(0,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),fn,userTagsList);
 edit->editor().setReadOnly(false);
 edit->editor().setEncoding(input_encoding);
 initCompleter();
@@ -2911,7 +2905,7 @@ if (fItems.size()>0 )
       isblocks_expanded=fItems.at(0)->isExpanded();
       }
   }  
-LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
+LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
 temp=currentEditorView();
 FilesMap::Iterator it;
 QString fn;
@@ -3203,7 +3197,7 @@ UpdateCaption();
 
 void Texmaker::fileSaveAll()
 {
-LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
+LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
 temp=currentEditorView();
 FilesMap::Iterator it;
 for( it = filenames.begin(); it != filenames.end(); ++it )
@@ -3219,7 +3213,7 @@ void Texmaker::fileBackupAll()
 {
 if (!currentEditorView() ) return;
 QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
+LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
 temp=currentEditorView();
 QString fn;
 FilesMap::Iterator it;
@@ -3715,7 +3709,7 @@ delete OpenedFilesListWidget->currentItem();
 
 void Texmaker::allReload()
 {
-LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
+LatexEditorView *temp = new LatexEditorView(EditorView,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
 temp=currentEditorView();
 FilesMap::Iterator it;
 FilesMap tempfilenames=filenames;
@@ -4029,8 +4023,6 @@ parenmatch=config->value( "Editor/Parentheses Matching",true).toBool();
 showline=config->value( "Editor/Line Numbers",true).toBool();
 completion=config->value( "Editor/Completion",true).toBool();
 userCompletionList=config->value( "Editor/UserCompletion",true).toStringList();
-svnEnable=config->value( "Editor/SvnEnable",false).toBool();
-svnPath=config->value("Editor/SvnPath","").toString();
 shortcuts.clear();
 QStringList data,shortcut;
 data=config->value("Shortcuts/data").toStringList();
@@ -4536,8 +4528,6 @@ config.setValue( "Editor/Parentheses Matching",parenmatch);
 config.setValue( "Editor/Line Numbers",showline);
 config.setValue( "Editor/Completion",completion);
 config.setValue( "Editor/UserCompletion",userCompletionList);
-config.setValue( "Editor/SvnEnable",svnEnable);
-config.setValue( "Editor/SvnPath",svnPath);
 QStringList data,shortcut;
 KeysMap::Iterator its;
 
@@ -9335,9 +9325,6 @@ void Texmaker::GeneralOptions()
 {
 ConfigDialog *confDlg = new ConfigDialog(this);
 
-confDlg->ui.lineEditSvn->setText(svnPath);
-confDlg->ui.checkBoxSvn->setChecked(svnEnable);
-
 confDlg->ui.lineEditLualatex->setText(lualatex_command);
 confDlg->ui.lineEditXelatex->setText(xelatex_command);
 confDlg->ui.lineEditPath->setText(extra_path);
@@ -9518,9 +9505,6 @@ if (confDlg->exec())
 	quick_asy_command=confDlg->ui.lineEditAsyQuick->text();
 	lp_options=confDlg->ui.lineEditPrinter->text();
 	
-	svnEnable=confDlg->ui.checkBoxSvn->isChecked();
-	svnPath=confDlg->ui.lineEditSvn->text();
-	
 	lualatex_command=confDlg->ui.lineEditLualatex->text();
 	xelatex_command=confDlg->ui.lineEditXelatex->text();
 	extra_path=confDlg->ui.lineEditPath->text();
@@ -9655,7 +9639,7 @@ if (confDlg->exec())
 
 	if (currentEditorView())
 		{
-		LatexEditorView *temp = new LatexEditorView( EditorView,EditorFont,svnEnable,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
+		LatexEditorView *temp = new LatexEditorView( EditorView,EditorFont,showline,edcolors(),hicolors(),inlinespellcheck,spell_ignored_words,spellChecker,tabspaces,tabwidth,QKeySequence(keyToggleFocus),getName(),userTagsList);
 		temp=currentEditorView();
 		FilesMap::Iterator it;
 		initCompleter();
@@ -9687,7 +9671,7 @@ if (confDlg->exec())
 			else currentEditorView()->editor().setCompleter(0);
 			currentEditorView()->editor().setTabSettings(tabspaces,tabwidth);
 			currentEditorView()->editor().setKeyViewerFocus(QKeySequence(keyToggleFocus));
-			currentEditorView()->changeSettings(EditorFont,svnEnable,showline);
+			currentEditorView()->changeSettings(EditorFont,showline);
 			currentEditorView()->editor().highlighter->setColors(hicolors());
 			currentEditorView()->editor().setColors(edcolors());
 

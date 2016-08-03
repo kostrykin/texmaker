@@ -34,7 +34,6 @@ public slots:
 private slots:
 void createIcons();
 void browseAspell();
-void browseSvn();
 void browseLatex();
 void browseDvips();
 void browseBibtex();
