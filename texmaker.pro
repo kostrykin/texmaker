@@ -75,7 +75,6 @@ HEADERS	+= texmaker.h \
 	spellerdialog.h \
 	xmltagslistwidget.h \
 	blockdata.h \
-	manhattanstyle.h \
 	stylehelper.h \
 	styleanimator.h \
 	keysequencedialog.h \
@@ -188,7 +187,6 @@ SOURCES	+= main.cpp \
 	spellerdialog.cpp \
 	xmltagslistwidget.cpp \
 	blockdata.cpp \
-	manhattanstyle.cpp \
 	stylehelper.cpp \
 	styleanimator.cpp \
 	keysequencedialog.cpp \

@@ -75,7 +75,6 @@
 #include "texmaker.h"
 #include "texmakerapp.h"
 #include "latexeditorview.h"
-#include "manhattanstyle.h"
 #include "structdialog.h"
 #include "filechooser.h"
 #include "graphicfilechooser.h"
@@ -4105,7 +4104,6 @@ latexmk_command=config->value("Tools/Latexmk","\"latexmk\" -e \"$pdflatex=q/pdfl
 sweave_command=config->value("Tools/Sweave","R CMD Sweave %.Rnw").toString();
 texdoc_command=config->value("Tools/Texdoc","texdoc").toString();
 htlatex_command=config->value("Tools/Htlatex","htlatex").toString();
-if (modern_style) qApp->setStyle(new ManhattanStyle(baseName));
 quick_asy_command=config->value("Tools/QuickAsy","asy -f pdf -noView %.asy|open %.pdf").toString();
 lp_options=config->value("Tools/LP","-o fitplot").toString();
 
@@ -4204,16 +4202,10 @@ if (new_user)
 //\"C:/Program Files/MiKTeX 2.7/miktex/bin/yap.exe\" -1 -s @%.tex %.dvi
 quick_asy_command=config->value("Tools/QuickAsy","\"C:/Program Files/Asymptote/asy.exe\" -f pdf -noView %.asy|"+viewpdf_command).toString();
 lp_options=config->value("Tools/LP","").toString();
-if (modern_style) qApp->setStyle(new ManhattanStyle(baseName));
 #endif
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 keyToggleFocus=config->value("Shortcuts/togglefocus","Ctrl+Space").toString();
 int desktop_env=1; // 1 : no kde ; 2: kde ; 3 : kde4 ; 
-QStringList styles = QStyleFactory::keys();
-QString kdesession= ::getenv("KDE_FULL_SESSION");
-QString kdeversion= ::getenv("KDE_SESSION_VERSION");
-if (!kdesession.isEmpty()) desktop_env=2;
-if (!kdeversion.isEmpty()) desktop_env=3;
 //desktop_env=1;
 latex_command=config->value("Tools/Latex","latex -interaction=nonstopmode %.tex").toString();
 dvips_command=config->value("Tools/Dvips","dvips -o %.ps %.dvi").toString();
@@ -4258,7 +4250,6 @@ sweave_command=config->value("Tools/Sweave","R CMD Sweave %.Rnw").toString();
 texdoc_command=config->value("Tools/Texdoc","texdoc").toString();
 htlatex_command=config->value("Tools/Htlatex","htlatex").toString();
 
-x11style=config->value( "X11/Style","Plastique").toString();
 if (xf.contains("DejaVu Sans",Qt::CaseInsensitive)) deft="DejaVu Sans";
 else if (xf.contains("DejaVu Sans LGC",Qt::CaseInsensitive)) deft="DejaVu Sans LGC";
 else if (xf.contains("Bitstream Vera Sans",Qt::CaseInsensitive)) deft="Bitstream Vera Sans";
@@ -4266,42 +4257,6 @@ else if (xf.contains("Luxi Sans",Qt::CaseInsensitive)) deft="Luxi Sans";
 else deft=qApp->font().family();
 x11fontfamily=config->value("X11/Font Family",deft).toString();
 x11fontsize=config->value( "X11/Font Size","10").toInt();
-
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
-if (modern_style)
-    {
-qApp->setStyle(new ManhattanStyle(QLatin1String("fusion")));
-    }
-// else
-// {
-// QApplication::setStyle(QStyleFactory::create("fusion"));
-// }
-#else
-if (modern_style)
-    {
-    if (desktop_env ==1) //no-kde
-	{
-	if (styles.contains("GTK+")) qApp->setStyle(new ManhattanStyle(QString("GTK+")));//gtkstyle
-	else qApp->setStyle(new ManhattanStyle(QString("Cleanlooks")));
-	}
-    else if ((desktop_env ==3) && (styles.contains("Oxygen"))) qApp->setStyle(new ManhattanStyle(QString("Oxygen"))); //kde4+oxygen 
-    else qApp->setStyle(new ManhattanStyle(QString("Plastique"))); //others
-    QString baseStyleName = qApp->style()->objectName(); //fallback
-    if (baseStyleName == QLatin1String("Windows")) qApp->setStyle(new ManhattanStyle(QString("Plastique"))); //fallback
-    }
-else
-    {
-    if (desktop_env ==1) //no-kde
-	{
-	if (styles.contains("GTK+")) QApplication::setStyle(QStyleFactory::create("GTK+"));//gtkstyle
-	else QApplication::setStyle(QStyleFactory::create("Cleanlooks"));
-	}
-    else if ((desktop_env ==3) && (styles.contains("Oxygen"))) QApplication::setStyle(QStyleFactory::create("Oxygen")); //kde4+oxygen
-    else QApplication::setStyle(QStyleFactory::create("Plastique")); //others
-    QString baseStyleName = qApp->style()->objectName(); //fallback
-    if (baseStyleName == QLatin1String("Windows")) QApplication::setStyle(QStyleFactory::create("Plastique")); //fallback
-    }
-#endif
 
 // QApplication::setPalette(QApplication::style()->standardPalette());
 QFont x11Font (x11fontfamily,x11fontsize);
