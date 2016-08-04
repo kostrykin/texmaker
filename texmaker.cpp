@@ -93,6 +93,7 @@
 #include "exportdialog.h"
 #include "versiondialog.h"
 #include "unicodedialog.h"
+#include "toolbutton.h"
 
 #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
 #include "x11fontdialog.h"
@@ -131,13 +132,25 @@ static QString defaultSessionFilePath()
 const static QString XML_TRUE  = "true";
 const static QString XML_FALSE = "false";
 
+const static QString DEFAULT_SESSION_NAME = "";
+
 
 Texmaker::Texmaker( QWidget* const parent )
     : QMainWindow( parent )
+    , sessionNameView( new QLabel() )
+    , mainMenu( new QMenu() )
 {
+    //setWindowFlags( Qt::FramelessWindowHint | Qt::Tool | Qt::CustomizeWindowHint );
     eraseSettings = false;
     replaceSettings = false;
     ReadSettings();
+
+    QFont sessionNameFont = sessionNameView->font();
+    sessionNameFont.setPointSize( sessionNameFont.pointSize() + 1 );
+    sessionNameFont.setBold( true );
+    sessionNameView->setFont( sessionNameFont );
+    sessionNameView->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Preferred );
+    sessionNameView->setAlignment( Qt::AlignCenter );
     
      if (spelldicExist()) 
            {
@@ -653,11 +666,11 @@ Texmaker::Texmaker( QWidget* const parent )
     
     if (new_gui) 
     {
-    restoreState(windowstate, 0);
-    if (winmaximized) this->setWindowState(Qt::WindowMaximized);
-    splitter1->restoreState(splitter1state);
-    splitter2->restoreState(splitter2state);
-    splitter3->restoreState(splitter3state);
+        restoreState(windowstate, 0);
+        if (winmaximized) this->setWindowState(Qt::WindowMaximized);
+        splitter1->restoreState(splitter1state);
+        splitter2->restoreState(splitter2state);
+        splitter3->restoreState(splitter3state);
     }
     
     
@@ -727,9 +740,8 @@ void Texmaker::setupMenus()
 QAction *Act;
 bool gtkEnv=gtkSession();
 //file
-fileMenu = menuBar()->addMenu(tr("&File"));
-if (gtkEnv) Act = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/filenew.png")), tr("New"), this);
-else Act = new QAction(getIcon(":/images/filenew.png"), tr("New"), this);
+fileMenu = mainMenu->addMenu( tr ( "&File" ) );
+Act = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/document-new.svg")), tr("New"), this);
 Act->setShortcut(Qt::CTRL+Qt::Key_N);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileNew()));
 fileMenu->addAction(Act);
@@ -738,8 +750,7 @@ Act = new QAction(tr("New by copying an existing file"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileNewFromFile()));
 fileMenu->addAction(Act);
 
-if (gtkEnv) Act = new QAction(QIcon::fromTheme("document-open", QIcon(":/images/fileopen.png")), tr("Open"), this);
-else Act = new QAction(getIcon(":/images/fileopen.png"), tr("Open"), this);
+Act = new QAction(QIcon::fromTheme("document-open", QIcon(":/images/document-open.svg")), tr("Open"), this);
 Act->setShortcut(Qt::CTRL+Qt::Key_O);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileOpen()));
 fileMenu->addAction(Act);
@@ -759,20 +770,19 @@ recentMenu->addAction(Act);
 
 sessionMenu=fileMenu->addMenu(tr("Session"));
 
-Act = new QAction(tr("New"), this);
+Act = new QAction(tr("New Session"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(startNewSession()));
 sessionMenu->addAction(Act);
 
-Act = new QAction(tr("Open"), this);
+Act = new QAction(tr("Open Another Session..."), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(loadAnotherSession()));
 sessionMenu->addAction(Act);
 
-Act = new QAction(tr("Save As"), this);
+Act = new QAction(tr("Save Aession As..."), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(saveSessionAs()));
 sessionMenu->addAction(Act);
 
-if (gtkEnv) SaveAct = new QAction(QIcon::fromTheme("document-save", QIcon(":/images/filesave.png")), tr("Save"), this);
-else SaveAct = new QAction(getIcon(":/images/filesave.png"), tr("Save"), this);
+SaveAct = new QAction(QIcon::fromTheme("document-save", QIcon(":/images/document-save.svg")), tr("Save"), this);
 SaveAct->setShortcut(Qt::CTRL+Qt::Key_S);
 connect(SaveAct, SIGNAL(triggered()), this, SLOT(fileSave()));
 fileMenu->addAction(SaveAct);
@@ -818,28 +828,24 @@ connect(Act, SIGNAL(triggered()), this, SLOT(fileExit()));
 fileMenu->addSeparator();
 fileMenu->addAction(Act);
 
-editMenu = menuBar()->addMenu(tr("&Edit"));
-if (gtkEnv) UndoAct = new QAction(QIcon::fromTheme("edit-undo", QIcon(":/images/undo.png")), tr("Undo"), this);
-else UndoAct = new QAction(getIcon(":/images/undo.png"), tr("Undo"), this);
+editMenu = mainMenu->addMenu( tr ( "&Edit" ) );
+UndoAct = new QAction(QIcon::fromTheme("edit-undo", QIcon(":/images/edit-undo.svg")), tr("Undo"), this);
 UndoAct->setShortcut(Qt::CTRL+Qt::Key_Z);
 connect(UndoAct, SIGNAL(triggered()), this, SLOT(editUndo()));
 editMenu->addAction(UndoAct);
 
-if (gtkEnv) RedoAct = new QAction(QIcon::fromTheme("edit-redo", QIcon(":/images/redo.png")), tr("Redo"), this);
-else RedoAct = new QAction(getIcon(":/images/redo.png"), tr("Redo"), this);
+RedoAct = new QAction(QIcon::fromTheme("edit-redo", QIcon(":/images/edit-redo.svg")), tr("Redo"), this);
 RedoAct->setShortcut(Qt::CTRL+Qt::Key_Y);
 connect(RedoAct, SIGNAL(triggered()), this, SLOT(editRedo()));
 editMenu->addAction(RedoAct);
 editMenu->addSeparator();
 
-if (gtkEnv) CopyAct = new QAction(QIcon::fromTheme("edit-copy", QIcon(":/images/editcopy.png")), tr("Copy"), this);
-else CopyAct = new QAction(getIcon(":/images/editcopy.png"), tr("Copy"), this);
+CopyAct = new QAction(QIcon::fromTheme("edit-copy", QIcon(":/images/edit-copy.svg")), tr("Copy"), this);
 CopyAct->setShortcut(Qt::CTRL+Qt::Key_C);
 connect(CopyAct, SIGNAL(triggered()), this, SLOT(editCopy()));
 editMenu->addAction(CopyAct);
 
-if (gtkEnv) CutAct = new QAction(QIcon::fromTheme("edit-cut", QIcon(":/images/editcut.png")), tr("Cut"), this);
-else CutAct = new QAction(getIcon(":/images/editcut.png"), tr("Cut"), this);
+CutAct = new QAction(QIcon::fromTheme("edit-cut", QIcon(":/images/edit-cut.svg")), tr("Cut"), this);
 CutAct->setShortcut(Qt::CTRL+Qt::Key_X);
 connect(CutAct, SIGNAL(triggered()), this, SLOT(editCut()));
 editMenu->addAction(CutAct);
@@ -929,7 +935,7 @@ Act->setData("Refresh Bibliography");
 connect(Act, SIGNAL(triggered()), this, SLOT(UpdateBibliography()));
 editMenu->addAction(Act);
 
-toolMenu = menuBar()->addMenu(tr("&Tools"));
+toolMenu = mainMenu->addMenu( tr ( "&Tools" ) );
 Act = new QAction(getIcon(":/images/quick.png"),tr("Quick Build"), this);
 Act->setData(Act->text());
 Act->setShortcut(Qt::Key_F1);
@@ -1041,7 +1047,7 @@ connect(Act, SIGNAL(triggered()), this, SLOT(PreviousError()));
 Act = new QAction(getIcon(":/images/errornext.png"),tr("Next LaTeX Error"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(NextError()));
 
-math1Menu = menuBar()->addMenu(tr("&Math"));
+math1Menu = mainMenu->addMenu( tr ( "&Math" ) );
 Act = new QAction(tr("Inline math mode $...$"), this);
 Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_M);
 Act->setData("$"+QString(0x2022)+"$/2/0/The math environment can be used in both paragraph and LR mode");
@@ -1325,7 +1331,7 @@ Act->setData("\\qquad/6/0/ ");
 connect(Act, SIGNAL(triggered()), this, SLOT(InsertFromAction()));
 math13Menu->addAction(Act);
 
-wizardMenu = menuBar()->addMenu(tr("&Wizard"));
+wizardMenu = mainMenu->addMenu( tr ( "&Wizard" ) );
 Act = new QAction(tr("Quick Start"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(QuickDocument()));
 wizardMenu->addAction(Act);
@@ -1349,7 +1355,7 @@ Act = new QAction(tr("Quick Array"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(QuickArray()));
 wizardMenu->addAction(Act);
 
-bibMenu = menuBar()->addMenu(tr("&Bibliography"));
+bibMenu = mainMenu->addMenu( tr ( "&Bibliography" ) );
 
 bibtexMenu=bibMenu->addMenu("Bibtex");
 Act = new QAction("Article in Journal", this);
@@ -1455,7 +1461,7 @@ connect(Act, SIGNAL(triggered()), this, SLOT(CleanBib()));
 bibMenu->addAction(Act);
 
 
-user1Menu = menuBar()->addMenu(tr("&User"));
+user1Menu = mainMenu->addMenu( tr ( "&User" ) );
 user11Menu=user1Menu->addMenu(tr("User &Tags"));
 Act = new QAction("1: "+UserMenuName[0], this);
 Act->setShortcut(Qt::SHIFT+Qt::Key_F1);
@@ -1548,7 +1554,7 @@ Act->setData("Other script");
 connect(Act, SIGNAL(triggered()), this, SLOT(editRunScript()));
 scriptMenu->addAction(Act);
 
-viewMenu = menuBar()->addMenu(tr("&View"));
+viewMenu = mainMenu->addMenu( tr ( "&View" ) );
 NextDocAct = new QAction(tr("Next Document"), this);
 NextDocAct->setData("Next");
 NextDocAct->setShortcut(Qt::ALT+Qt::Key_PageDown);
@@ -1604,7 +1610,7 @@ connect(FullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
 viewMenu->addAction(FullScreenAct);
 
 
-optionsMenu = menuBar()->addMenu(tr("&Options"));
+optionsMenu = mainMenu->addMenu( tr ( "&Options" ) );
 Act = new QAction(getIcon(":/images/configure.png"), tr("Configure Texmaker"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(GeneralOptions()));
 optionsMenu->addAction(Act);
@@ -1664,7 +1670,7 @@ Act = new QAction( tr("Replace the settings file by a new one"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(ReplaceSettings()));
 settingsMenu->addAction(Act);
 	
-helpMenu = menuBar()->addMenu(tr("&Help"));
+helpMenu = mainMenu->addMenu( tr ( "&Help" ) );
 if (gtkEnv) Act = new QAction(QIcon::fromTheme("help-contents", QIcon(":/images/help.png")), tr("LaTeX Reference"), this);
 else Act = new QAction(getIcon(":/images/help.png"), tr("LaTeX Reference"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(LatexHelp()));
@@ -1690,8 +1696,7 @@ helpMenu->addAction(Act);
 }
 else
 {
-if (gtkEnv) Act = new QAction(QIcon::fromTheme("help-contents", QIcon(":/images/help.png")), QString::fromUtf8("LaTeX wikibook"), this); 
-else Act = new QAction(getIcon(":/images/help.png"), QString::fromUtf8("LaTeX wikibook"), this);
+Act = new QAction(QIcon::fromTheme("help-contents", QIcon(":/images/help.png")), QString::fromUtf8("LaTeX wikibook"), this); 
 connect(Act, SIGNAL(triggered()), this, SLOT(Doculatex()));
 helpMenu->addAction(Act);  
 }  
@@ -1791,41 +1796,43 @@ void Texmaker::setupToolBars()
 QAction *Act;
 QStringList list;
 bool gtkEnv=gtkSession();
-//file
-fileToolBar = addToolBar("File ToolBar");
-fileToolBar->setMovable( false );
-fileToolBar->setFloatable( false );
-fileToolBar->setObjectName("File");
 
-if (gtkEnv) Act = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/filenew.png")), tr("New"), this);
-else Act = new QAction(getIcon(":/images/filenew.png"), tr("New"), this);
+mainToolBar = addToolBar( "Main Toolbar" );
+mainToolBar->setMovable( false );
+mainToolBar->setFloatable( false );
+mainToolBar->setObjectName( "MainToolBar" );
+
+Act = new QAction(QIcon::fromTheme("document-new", QIcon(":/images/document-new.svg")), tr("New"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileNew()));
-fileToolBar->addAction(Act);
+mainToolBar->addAction(Act);
 
-if (gtkEnv) Act = new QAction(QIcon::fromTheme("document-open", QIcon(":/images/fileopen.png")), tr("Open"), this);
-else Act = new QAction(getIcon(":/images/fileopen.png"), tr("Open"), this);
+Act = new QAction(QIcon::fromTheme("document-open", QIcon(":/images/document-open.svg")), tr("Open"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileOpen()));
-fileToolBar->addAction(Act);
+mainToolBar->addAction(Act);
 
-fileToolBar->addAction(SaveAct);
+mainToolBar->addAction(SaveAct);
 
 //edit
-editToolBar = addToolBar("Edit ToolBar");
-editToolBar->setMovable( false );
-editToolBar->setFloatable( false );
-editToolBar->setObjectName("Edit");
-editToolBar->addAction(UndoAct);
-editToolBar->addAction(RedoAct);
-editToolBar->addAction(CopyAct);
-editToolBar->addAction(CutAct);
-editToolBar->addAction(PasteAct);
+mainToolBar->addSeparator();
+mainToolBar->addAction(UndoAct);
+mainToolBar->addAction(RedoAct);
+mainToolBar->addAction(CopyAct);
+mainToolBar->addAction(CutAct);
+mainToolBar->addAction(PasteAct);
+
+//session
+QToolButton* const sessionToolButton = new ToolButton();
+sessionToolButton->setMenu( sessionMenu );
+sessionToolButton->setPopupMode( QToolButton::InstantPopup );
+sessionToolButton->setIcon( QIcon (":/images/session.svg" ) );
+sessionToolButton->setArrowType( Qt::NoArrow );
+sessionToolButton->setToolTip( tr( "Session" ) );
+mainToolBar->addSeparator();
+mainToolBar->addWidget( sessionToolButton );
+mainToolBar->addWidget( sessionNameView );
+mainToolBar->addSeparator();
 
 //tools
-runToolBar = addToolBar("Tools Toolbar");
-runToolBar->setMovable( false );
-runToolBar->setFloatable( false );
-runToolBar->setObjectName("Tools");
-
 list.clear();
 list.append(tr("Quick Build"));
 list.append("LaTeX");
@@ -1844,26 +1851,36 @@ list.append("LuaLaTeX");
 
 for ( int i = 0; i <= 4; i++ ) list.append(QString::number(i+1)+": "+UserToolName[i]);
 
-comboCompil = new QComboBox(runToolBar);
+build       = mainToolBar->addAction( QIcon::fromTheme( "media-playback-start", QIcon (":/images/media-playback-start.svg" ) ), tr(  "Run" ) );
+comboCompil = new QComboBox(mainToolBar);
 comboCompil->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 comboCompil->addItems(list);
 comboCompil->setCurrentIndex(runIndex);
-connect(runToolBar->addAction(getIcon(":/images/run.png"),tr("Run")), SIGNAL(triggered()), this, SLOT(doCompile()));
-runToolBar->addWidget(comboCompil);
+connect(build, SIGNAL(triggered()), this, SLOT(doCompile()));
+mainToolBar->addWidget(comboCompil);
 
 list.clear();
 list.append(tr("View Dvi"));
 list.append(tr("View PS"));
 list.append(tr("View PDF"));
 
-comboView = new QComboBox(runToolBar);
+view      = mainToolBar->addAction( QIcon::fromTheme( "media-playback-start", QIcon (":/images/media-playback-start.svg" ) ), tr( "View" ) );
+comboView = new QComboBox(mainToolBar);
 comboView->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 comboView->addItems(list);
 comboView->setCurrentIndex(viewIndex);
-connect(runToolBar->addAction(getIcon(":/images/run.png"),tr("View")), SIGNAL(triggered()), this, SLOT(doView()));
-runToolBar->addWidget(comboView);
+connect(view, SIGNAL(triggered()), this, SLOT(doView()));
+mainToolBar->addWidget(comboView);
 
-
+// menu
+mainMenu->addMenu( helpMenu );
+QToolButton* const mainMenuButton = new ToolButton();
+mainMenuButton->setMenu( mainMenu );
+mainMenuButton->setPopupMode( QToolButton::InstantPopup );
+mainMenuButton->setIcon( QIcon::fromTheme( "open-menu", QIcon (":/images/open-menu.svg" ) ) );
+mainMenuButton->setArrowType( Qt::NoArrow );
+mainToolBar->addSeparator();
+mainToolBar->addWidget( mainMenuButton );
 
 Act = new QAction(getIcon(":/images/viewlog.png"),tr("View Log"), this);
 connect(Act, SIGNAL(triggered()), this, SLOT(ViewLog()));
@@ -1885,11 +1902,6 @@ StopAct = new QAction(getIcon(":/images/process-stop.png"),tr("Stop Process"), t
 connect(StopAct, SIGNAL(triggered()), this, SLOT(stopProcess()));
 logToolBar->addAction(StopAct);
 StopAct->setEnabled(false);
-
-viewMenu->addSeparator();
-viewMenu->addAction(fileToolBar->toggleViewAction());
-viewMenu->addAction(editToolBar->toggleViewAction());
-viewMenu->addAction(runToolBar->toggleViewAction());
 }
 
 
@@ -3601,6 +3613,7 @@ QString deft;
 bool new_user=(!config->contains("GUI/New Version"));
 
 sessionFilePath = config->value( "Session", defaultSessionFilePath() ).toString();
+setSessionName( DEFAULT_SESSION_NAME );
 
 modern_style=config->value( "GUI/Style",true).toBool();
 new_gui=config->value( "GUI/New Version",false).toBool();
@@ -9810,7 +9823,7 @@ void Texmaker::disableToolsActions()
 QList<QAction *> listaction;
 listaction << toolMenu->actions();
 listaction << user12Menu->actions();
-listaction << runToolBar->actions();
+listaction << build << view;
 QListIterator<QAction*> iterator(listaction);
 while ( iterator.hasNext() )
 	{
@@ -9825,7 +9838,7 @@ void Texmaker::enableToolsActions()
 QList<QAction *> listaction;
 listaction << toolMenu->actions();
 listaction << user12Menu->actions();
-listaction << runToolBar->actions();
+listaction << build << view;
 QListIterator<QAction*> iterator(listaction);
 while ( iterator.hasNext() )
 	{
@@ -10372,6 +10385,7 @@ void Texmaker::saveSessionAs()
             saveSession();
             copyFile( sessionFilePath, newPath );
             sessionFilePath = newPath;
+            setSessionName( sessionFilePath );
         }
     }
 }
@@ -10449,6 +10463,7 @@ void Texmaker::startNewSession( bool saveCurrent )
     if( closeAll() )
     {
         sessionFilePath = defaultSessionFilePath();
+        setSessionName( DEFAULT_SESSION_NAME );
 
         /* Switch to single-mode.
          */
@@ -10480,6 +10495,7 @@ void Texmaker::loadAnotherSession()
     {
         saveSession();
         sessionFilePath = newPath;
+        setSessionName( sessionFilePath );
         if( !loadSession() )
         {
             /* If something goes wrong, we start a fresh session,
@@ -10501,6 +10517,7 @@ struct LoadSession_FileData
     std::tr1::array< int, 3 > bookmarks;
     bool master;
 };
+
 
 /**
  * Loads the session from the current `sessionFilePath`.
@@ -10619,6 +10636,19 @@ bool Texmaker::loadSession()
     /* Roar!
      */
     return true;
+}
+
+
+void Texmaker::setSessionName( const QString& sessionName )
+{
+    if( sessionName == DEFAULT_SESSION_NAME )
+    {
+        sessionNameView->setText( tr( "Intermediate Session" ) );
+    }
+    else
+    {
+        sessionNameView->setText( sessionFilePath );
+    }
 }
 
 

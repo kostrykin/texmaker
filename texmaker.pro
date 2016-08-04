@@ -33,6 +33,7 @@ DEFINES += OLDPOPPLER
 ###############################
 HEADERS	+= texmaker.h \
 	geticon.h \
+	toolbutton.h \
 	documentview.h \
 	pageitem.h \
 	presentationview.h \
@@ -143,6 +144,7 @@ HEADERS	+= texmaker.h \
 	encodingprober/UnicodeGroupProber.h 
 SOURCES	+= main.cpp \
 	geticon.cpp \
+	toolbutton.cpp \
 	texmakerapp.cpp \
 	texmaker.cpp \
 	documentview.cpp \

@@ -693,5 +693,15 @@
 	<file>tags/asymptote_tags.xml</file>
 	<file>diff/checkdiff.txt</file>
 	<file>utilities/license_html.txt</file>
+	<file>images/document-new.svg</file>
+	<file>images/document-save.svg</file>
+	<file>images/document-open.svg</file>
+	<file>images/open-menu.svg</file>
+	<file>images/media-playback-start.svg</file>
+	<file>images/edit-undo.svg</file>
+	<file>images/edit-redo.svg</file>
+	<file>images/edit-copy.svg</file>
+	<file>images/edit-cut.svg</file>
+	<file>images/session.svg</file>
     </qresource>
 </RCC>

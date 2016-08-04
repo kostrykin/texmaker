@@ -141,8 +141,10 @@ private:
     QMenu *viewMenu;
     QMenu *optionsMenu, *translationMenu, *appearanceMenu, *settingsMenu, *scriptMenu;
     QMenu *helpMenu;
+    QMenu* const mainMenu;
     
-    QToolBar *fileToolBar, *editToolBar, *runToolBar, /* *formatToolBar ,*/ *logToolBar, *LeftPanelToolBar,*LeftPanelToolBarBis, *centralToolBar, *centralToolBarBis;
+    QToolBar *mainToolBar, *logToolBar, *LeftPanelToolBar,*LeftPanelToolBarBis, *centralToolBar, *centralToolBarBis;
+    QAction *build, *view;
     QAction *recentFileActs[10], *ToggleAct, *StopAct, *UndoAct, *RedoAct, *SaveAct, *CutAct, *CopyAct,*PasteAct, *ToggleDocAct, *ViewStructurePanelAct, *ViewLogPanelAct, *ViewPdfPanelAct, *ViewSourcePanelAct, *FullScreenAct, *NextDocAct, *PrevDocAct, *ViewOpenedFilesPanelAct ;
     
     QAction *relationAct, *arrowAct, *miscAct, *delimAct, *greekAct, *usedAct, *favAct, *leftrightAct, *pstricksAct, *mpAct, *tikzAct, *asyAct, *userpanelAct;
@@ -156,6 +158,7 @@ private:
     bool logpresent;
     QStringList recentFilesList;
     QString sessionFilePath;
+    QLabel* const sessionNameView;
     
     //settings
     bool eraseSettings, replaceSettings;
@@ -228,6 +231,7 @@ public slots:
     void startNewSession( bool saveCurrent = true );
     bool loadSession();
     void loadAnotherSession();
+    void setSessionName( const QString& name );
 
 private slots:
 LatexEditorView *currentEditorView() const;
