@@ -19,86 +19,127 @@
 #include <QFontDatabase>
 #include "texmakerapp.h"
 
-TexmakerApp *TexmakerApp::theAppInstance = NULL;
 
-TexmakerApp::TexmakerApp(const QString &appId, int & argc, char ** argv ) : QtSingleApplication (appId, argc, argv )
+TexmakerApp* TexmakerApp::theAppInstance = 0;
+
+
+TexmakerApp::TexmakerApp( const QString& appId, unsigned int argc, const char** argv )
+    : QtSingleApplication( appId, reinterpret_cast< int& >( argc ), const_cast< char** >( argv ) ) // FIXME: screw Qt's type qualifiers!
+    , mw( 0 )
+    , language( QString( QLocale::system().name() ) )
 {
-mw = NULL;
-theAppInstance = this;
-language=QString(QLocale::system().name());
+    theAppInstance = this;
 }
+
 
 TexmakerApp::~TexmakerApp()
 {
-    if (mw) delete mw;
-SaveSettings();
+    SaveSettings();
 }
 
-void TexmakerApp::makeTranslation(const QString &lang)
+
+void TexmakerApp::makeTranslation( const QString& lang )
 {
-QString locale=lang;
-foreach (QTranslator* tr, translatorsList) 
+    const QString locale = lang.length() < 2 ? "en" : lang;
+    foreach( QTranslator* tr, translatorsList ) 
     {
-    removeTranslator(tr);
-    delete tr;
+        removeTranslator( tr );
+        delete tr;
     }
-translatorsList.clear();
-QTranslator* appTranslator=new QTranslator(this);
-QTranslator* basicTranslator=new QTranslator(this);
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-#ifdef USB_VERSION
-QString transdir=QCoreApplication::applicationDirPath();
-#else
-QString transdir=PREFIX"/share/texmaker";
-#endif
-#endif
-#if defined(Q_OS_MAC)
-QString transdir=QCoreApplication::applicationDirPath() + "/../Resources";
-#endif
-#if defined(Q_OS_WIN32)
-QString transdir=QCoreApplication::applicationDirPath();
-#endif
-if ( locale.length() < 2 ) locale = "en";
-if (appTranslator->load(QString("texmaker_")+locale,transdir)) 	
+    translatorsList.clear();
+
+    QTranslator* const   appTranslator = new QTranslator( this );
+    QTranslator* const basicTranslator = new QTranslator( this );
+
+    const QString transdir =
+        #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+        #ifdef USB_VERSION
+            QCoreApplication::applicationDirPath();
+        #else
+            PREFIX"/share/texmaker";
+        #endif
+        #endif
+        #if defined(Q_OS_MAC)
+            QCoreApplication::applicationDirPath() + "/../Resources";
+        #endif
+        #if defined(Q_OS_WIN32)
+            QCoreApplication::applicationDirPath();
+        #endif
+
+    if( appTranslator->load( QString( "texmaker_" ) + locale, transdir ) )
     {
-    installTranslator(appTranslator);
-    translatorsList.append(appTranslator);
+        installTranslator( appTranslator );
+        translatorsList.append( appTranslator );
     }
-if (basicTranslator->load(QString("qt_")+locale,transdir)) 
+    if( basicTranslator->load( QString( "qt_" ) + locale, transdir ) ) 
     {
-    installTranslator(basicTranslator);
-    translatorsList.append(basicTranslator);
+        installTranslator( basicTranslator );
+        translatorsList.append( basicTranslator );
     }
 }
+
+
+/**
+ * Initializes a new Texmaker instance using the commandline arguments `args`.
+ */
 void TexmakerApp::init( QStringList args )
 {
-ReadSettings();
-makeTranslation(language);
-QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed.ttf"));
-QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed-Bold.ttf"));
-QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed-Oblique.ttf"));
+    /* In contrast to the `ReadSettings` in `texmaker.cpp`,
+     * this here only loads the language setting.
+     */
+    ReadSettings();
+    makeTranslation( language );
 
-mw = new Texmaker();
-
-connect( this, SIGNAL( lastWindowClosed() ), this, SLOT( quit() ) );
-#if defined(Q_OS_MAC)
-if (!MacFile.isEmpty()) mw->load(MacFile);
-#endif
-for (QStringList::Iterator it = ++(args.begin()); it != args.end(); it++)
+    QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed.ttf"));
+    QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed-Bold.ttf"));
+    QFontDatabase::applicationFontFamilies(QFontDatabase::addApplicationFont(":/fonts/DejaVuSansCondensed-Oblique.ttf"));
+    
+    mw.reset( new Texmaker() );
+    if( args.isEmpty() )
     {
-    if ( (*it)[0] != '-') mw->load( *it );
-    else if ( *it == "-master" ) mw->ToggleMode();
-    else if ( ( *it == "-line") && (++it != args.end())) mw->setLine( *it );
+        /* No commandline arguments were given,
+         * thus restore the last session.
+         */
+        mw->loadSession();
     }
-}
+    else
+    {
+        /* Start a new session and load the given files,
+         * by interpreting the following commandline arguments scheme:
+         *
+         *      [ <file> [ -line N | -master ]* ]+
+         */
+        mw->startNewSession();
+        for( QStringList::Iterator it = ++( args.begin() ); it != args.end(); it++ )
+        {
+            if( ( *it )[ 0 ] != '-')
+            {
+                mw->load( *it );
+            }
+            else
+            if( *it == "-master" )
+            {
+                mw->ToggleMode();
+            }
+            else
+            if( ( *it == "-line" ) && ( ++it != args.end() ) )
+            {
+                mw->setLine( *it );
+            }
+        }
+    }
 
+    /* Quit as soon as the last window was closed.
+     */ 
+    connect( this, SIGNAL( lastWindowClosed() ), this, SLOT( quit() ) );
+}
 
 
 bool TexmakerApp::event ( QEvent * event )
 {
 if ( event->type() == QEvent::ApplicationActivate )
 {
-if (mw) mw->mainWindowActivated();
+if (mw.get()) mw->mainWindowActivated();
 }
 // else if ( event->type() == QEvent::ApplicationDeactivate )
 // {
@@ -116,7 +157,7 @@ return QApplication::event(event);
 }
 
 
-void TexmakerApp::ReadSettings()
+void TexmakerApp::ReadSettings() // TODO: make these re-usable
 {
 #ifdef USB_VERSION
 QSettings *config=new QSettings(QCoreApplication::applicationDirPath()+"/texmakerapp.ini",QSettings::IniFormat); //for USB-stick version

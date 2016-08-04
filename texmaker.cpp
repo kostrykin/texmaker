@@ -57,7 +57,8 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QProcessEnvironment>
-#include <QSysInfo> 
+#include <QSysInfo>
+#include <tr1/array> 
 
 #if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
 #if defined(Q_OS_MAC)
@@ -98,33 +99,37 @@
 #endif
 
 
-static QString temporaryDirectory()
+static QString applicationDataDirectory()
 {
-    QString tempDir = QDir::tempPath();
+    QString dataDir = QDir::tempPath();
     #if defined(Q_OS_UNIX) || defined(Q_OS_MAC)
     #if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
     const QString writableDir = QStandardPaths::writableLocation( QStandardPaths::CacheLocation );
     if( QDir().mkpath( writableDir ) )
     {
-        tempDir = writableDir;
+        dataDir = writableDir;
     }
     #else
     const QString cacheDir = QDesktopServices::storageLocation( QDesktopServices::CacheLocation );
     if( QDir().mkpath( cacheDir ) )
     {
-        tempDir = cacheDir;
+        dataDir = cacheDir;
     }
     #endif
     #endif
-    return tempDir;
+    return dataDir;
 }
 
 
-static QString temporarySessionFile()
+static QString defaultSessionFilePath()
 {
     QString prefixFile = QString( QUrl::toPercentEncoding( "tks_temp_" + QDir::homePath().section( '/', -1 ) ) );
-    return temporaryDirectory() + "/" + prefixFile.remove( "%" ) + ".tks";
+    return applicationDataDirectory() + "/" + prefixFile.remove( "%" ) + ".tks";
 }
+
+
+const static QString XML_TRUE  = "true";
+const static QString XML_FALSE = "false";
 
 
 Texmaker::Texmaker( QWidget* const parent )
@@ -133,8 +138,6 @@ Texmaker::Texmaker( QWidget* const parent )
     eraseSettings = false;
     replaceSettings = false;
     ReadSettings();
-    
-    sessionTempFile = temporarySessionFile();
     
      if (spelldicExist()) 
            {
@@ -755,16 +758,17 @@ connect(Act, SIGNAL(triggered()), this, SLOT(CleanRecent()));
 recentMenu->addAction(Act);
 
 sessionMenu=fileMenu->addMenu(tr("Session"));
-Act = new QAction(tr("Restore previous session"), this);
-Act->setShortcut(Qt::CTRL+Qt::SHIFT+Qt::Key_F8);
-connect(Act, SIGNAL(triggered()), this, SLOT(LoadLastSession()));
+
+Act = new QAction(tr("New"), this);
+connect(Act, SIGNAL(triggered()), this, SLOT(startNewSession()));
 sessionMenu->addAction(Act);
 
-Act = new QAction(tr("Save session"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(SaveSession()));
+Act = new QAction(tr("Open"), this);
+connect(Act, SIGNAL(triggered()), this, SLOT(loadAnotherSession()));
 sessionMenu->addAction(Act);
-Act = new QAction(tr("Load session"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(LoadSession()));
+
+Act = new QAction(tr("Save As"), this);
+connect(Act, SIGNAL(triggered()), this, SLOT(saveSessionAs()));
 sessionMenu->addAction(Act);
 
 if (gtkEnv) SaveAct = new QAction(QIcon::fromTheme("document-save", QIcon(":/images/filesave.png")), tr("Save"), this);
@@ -791,10 +795,6 @@ Act = new QAction(getIcon(":/images/fileclose.png"), tr("Close"), this);
 Act->setShortcut(Qt::CTRL+Qt::Key_W);
 connect(Act, SIGNAL(triggered()), this, SLOT(fileClose()));
 fileMenu->addSeparator();
-fileMenu->addAction(Act);
-
-Act = new QAction(tr("Close All"), this);
-connect(Act, SIGNAL(triggered()), this, SLOT(fileCloseAll()));
 fileMenu->addAction(Act);
 
 Act = new QAction(tr("Reload document from file"), this);
@@ -2091,7 +2091,7 @@ if (FileAlreadyOpen(f) || !QFile::exists( f )) return;
 QFileInfo fi(f);
 if  (fi.suffix()=="tks") 
   {
-  LoadSessionFile(f);
+  //LoadSessionFile(f);
   return;
   }
   
@@ -3007,66 +3007,6 @@ EditorView->setCurrentIndex(index);
 fileClose();
 }
 
-void Texmaker::fileCloseAll()
-{
-bool go=true;
-int query;
-QString locale = TexmakerApp::instance()->language.left(2);
-while (currentEditorView() && go)
-	{
-	if (currentEditorView()->editor().document()->isModified())
-		{
-if (locale=="en")
-{
-query=QMessageBox::warning(this, "Texmaker",
-					"The document contains unsaved work. "
-					"Do you want to save it before closing?",
-					"Save and Close", "Close without saving", "Cancel",
-					0,
-					2 );
-}
-else
-{
-query=QMessageBox::warning(this, "Texmaker",
-					tr("The document contains unsaved work. "
-					"Do you want to save it before closing?"),
-					tr("Save and Close"), tr("Don't Save and Close"), tr("Cancel"),
-					0,
-					2 );
-}
-		switch(query)
-			{
-			case 0:
-			fileSave();
-			filenames.remove(currentEditorView());
-			comboFiles->removeItem(comboFiles->currentIndex());
-			delete OpenedFilesListWidget->currentItem();
-			delete currentEditorView();
-			break;
-			case 1:
-			filenames.remove(currentEditorView());
-			comboFiles->removeItem(comboFiles->currentIndex());
-			delete OpenedFilesListWidget->currentItem();
-			delete currentEditorView();
-			break;
-			case 2:
-			default:
-			go=false;
-			return;
-			break;
-			}
-		}
-	else
-		{
-		filenames.remove(currentEditorView());
-		comboFiles->removeItem(comboFiles->currentIndex());
-		delete OpenedFilesListWidget->currentItem();
-		delete currentEditorView();
-		}
-	}
-UpdateCaption();
-}
-
 void Texmaker::fileExit()
 {
 if (clean_exit) AutoCleanAll();
@@ -3660,6 +3600,8 @@ QString deft;
 
 bool new_user=(!config->contains("GUI/New Version"));
 
+sessionFilePath = config->value( "Session", defaultSessionFilePath() ).toString();
+
 modern_style=config->value( "GUI/Style",true).toBool();
 new_gui=config->value( "GUI/New Version",false).toBool();
 
@@ -4156,7 +4098,7 @@ config->endGroup();
 
 void Texmaker::SaveSettings()
 {
-SaveLastSession();
+saveSession();
 #ifdef USB_VERSION
 QSettings config(QCoreApplication::applicationDirPath()+"/texmaker.ini",QSettings::IniFormat); 
 #else
@@ -4167,6 +4109,8 @@ config.setValue( "IniMode",true);
 config.beginGroup( "texmaker" );
 QList<int> sizes;
 QList<int>::Iterator it;
+
+config.setValue( "Session", sessionFilePath );
 
 config.setValue( "GUI/Style",modern_style);
 config.setValue( "GUI/New Version",true);
@@ -10327,283 +10271,373 @@ else
 }
 }
 
-void Texmaker::SaveSession()
-{
-if ( !currentEditorView() ) return;
-QString currentDir=QDir::homePath();
-if (!lastDocument.isEmpty())
-	{
-	QFileInfo fi(lastDocument);
-	if (fi.exists() && fi.isReadable()) currentDir=fi.absolutePath();
-	}
-QString fn = QFileDialog::getSaveFileName(this,tr("Save"),currentDir,"Texmaker session (*.tks);;All files (*.*)");
-if ( !fn.isEmpty() )
-	{
-	if (!fn.contains('.')) fn += ".tks";
-	QFile fic(fn);
-	if (!fic.open(QIODevice::WriteOnly)) 
-	    {
-	    QMessageBox::warning( this,tr("Error"),tr("The file could not be saved. Please check if you have write permission."));  
-	     return;
-	    }
-	QDomDocument doc;
-	QDomProcessingInstruction instr =  doc.createProcessingInstruction("xml","version=\"1.0\" encoding=\"UTF-8\"");
-	doc.appendChild(instr);
-	QDomElement root=doc.createElement("TexmakerSession");
-	root.setAttribute("quickmode",QString::number(quickmode));
-	doc.appendChild(root);
-	QDomElement element;
-	FilesMap::Iterator itf;
-	QString docname;
-	for( itf = filenames.begin(); itf != filenames.end(); ++itf )
-		{
-		docname=filenames[itf.key()];
-		if (!docname.startsWith("untitled"))
-		    {
-		    element=doc.createElement("document");
-		    element.setAttribute("file",docname);
-		    element.setAttribute("line",QString::number(itf.key()->editor().textCursor().blockNumber()));
-		    element.setAttribute("bookmark1",QString::number(itf.key()->editor().UserBookmark[0]));
-		    element.setAttribute("bookmark2",QString::number(itf.key()->editor().UserBookmark[1]));
-		    element.setAttribute("bookmark3",QString::number(itf.key()->editor().UserBookmark[2]));
-		    if ((!singlemode) && (MasterName==docname)) 		    element.setAttribute("master","true");
-		    else element.setAttribute("master","false");
-		    if (itf.key()==currentEditorView()) element.setAttribute("hasfocus","true");
-		    else element.setAttribute("hasfocus","false");
-		    root.appendChild(element);
-		    }
-		}
 
-	QTextStream out (&fic);
-	doc.save(out,4);
-	fic.close();
-	}  
-}
-
-void Texmaker::LoadSession()
+bool Texmaker::closeAll( bool prompt )
 {
-QString currentDir=QDir::homePath();
-if (!lastDocument.isEmpty())
-	{
-	QFileInfo fi(lastDocument);
-	if (fi.exists() && fi.isReadable()) currentDir=fi.absolutePath();
-	}
-QString fn = QFileDialog::getOpenFileName(this,tr("Open File"),currentDir,"Texmaker session (*.tks);;All files (*.*)");
-if (fn.isEmpty()) return;
-LoadSessionFile(fn);
-}
-
-void Texmaker::LoadSessionFile(const QString &fn)
-{
-QFile fic( fn );
-if ( !fic.open( QIODevice::ReadOnly ) )
-	{
-	QMessageBox::warning( this,tr("Error"), tr("You do not have read permission to this file."));
-	return;
-	}
-QDomDocument doc;
-if (!doc.setContent(&fic)) 
-  	{
-	fic.close();
-	return;
-	}
-QDomElement root = doc.documentElement();
-if (root.tagName() != "TexmakerSession")
-	{
-	fic.close();
-	return;
-	}
-if (root.hasAttribute("quickmode")) quickmode=root.attribute("quickmode").toInt();
-QString file, ofile;
-int b1, b2, b3, l, ob1, ob2, ob3, ol;
-bool ma, oma;
-bool fo=false;
-QDomElement element = root.firstChildElement();
-if (!singlemode) ToggleMode();
-while (!element.isNull()) 
-  {
-  b1=0;
-  b2=0;
-  b3=0;
-  l=0;
-  ma=false;
-  file="";
-  if (element.hasAttribute("file"))
-      {
-      file=element.attribute("file");
-      if (element.hasAttribute("line")) l=element.attribute("line").toInt();
-      if (element.hasAttribute("bookmark1")) b1=element.attribute("bookmark1").toInt();
-      if (element.hasAttribute("bookmark2")) b2=element.attribute("bookmark2").toInt();
-      if (element.hasAttribute("bookmark3")) b3=element.attribute("bookmark3").toInt();
-      if (element.hasAttribute("master")) ma=(element.attribute("master")=="true");
-      if (element.hasAttribute("hasfocus")) fo=(element.attribute("hasfocus")=="true");
-      if (fo)
-	{
-	ofile=file;
-	ol=l;
-	ob1=b1;
-	ob2=b2;
-	ob3=b3;
-	oma=ma;
-	}
-      else
-	{
-	fileOpenAndGoto(file,l+1,false);
-	if (currentEditorView() && getName()==file)
-	  {
-	  currentEditorView()->editor().UserBookmark[0]=b1;
-	  currentEditorView()->editor().UserBookmark[1]=b2;
-	  currentEditorView()->editor().UserBookmark[2]=b3;
-	  currentEditorView()->update();
-	  if (singlemode && ma) ToggleMode();
-	  }
-	}
-	
-      }
-element=element.nextSiblingElement();
-  }
-fic.close();
-if (!ofile.isEmpty())
+    /* Show each document, which is modified, and ask, whether it should be saved.
+     */
+    if( prompt )
     {
-    fileOpenAndGoto(ofile,l+1,true);
-    if (currentEditorView() && getName()==ofile)
-      {
-      currentEditorView()->editor().UserBookmark[0]=ob1;
-      currentEditorView()->editor().UserBookmark[1]=ob2;
-      currentEditorView()->editor().UserBookmark[2]=ob3;
-      currentEditorView()->update();
-      if (singlemode && oma) ToggleMode();
-      }
+        const QString locale = TexmakerApp::instance()->language.left( 2 );
+
+        const QString opt1 = ( locale == "en" ? "Save and Close"       : tr( "Save and Close"       ) );
+        const QString opt2 = ( locale == "en" ? "Close without Saving" : tr( "Don't Save and Close" ) );
+        const QString opt3 = ( locale == "en" ? "Cancel"               : tr( "Cancel"               ) );
+        const QString txt0 = "The document contains unsaved work. Do you want to save it before closing?";
+        const QString txt1 = ( locale == "en" ? txt0 : tr( txt0.toStdString().c_str() ) );
+
+        for( FilesMap::Iterator itr = filenames.begin(); itr != filenames.end(); ++itr )
+        {
+            if( currentEditorView()->editor().document()->isModified() )
+            {
+                EditorView->setCurrentIndex( EditorView->indexOf( itr.key() ) );
+                switch( QMessageBox::warning( this, "Texmaker", txt1, opt1, opt2, opt3, 0, 2 ) )
+                {
+
+                case 0:
+                    /* Save and proceed.
+                     */
+                    fileSave();
+                    break;
+
+                case 1:
+                    /* Don't save, but proceed.
+                     */
+                    break;
+
+                case 2:
+                default:
+                    /* Cancel.
+                     */
+                    return false;
+
+                }
+            }
+        }
+    }
+
+    /* The user has had his chance for saving and aborting.
+     * We may now proceed without further asking.
+     */
+    while( currentEditorView() )
+    {
+        filenames.remove(currentEditorView());
+        comboFiles->removeItem(comboFiles->currentIndex());
+        delete OpenedFilesListWidget->currentItem();
+        delete currentEditorView();
+    }
+
+    /* All files have been closed.
+     */
+    UpdateCaption();
+    return true;
+}
+
+
+/**
+ * Promots the user for a new `sessionFilePath` for keeping track of the session in from now on.
+ *
+ * Since it's our design paradigm to keep track of the session state implicitly,
+ * the session state is also saved (one last time) to the old `sessionFilePath`.
+ */
+void Texmaker::saveSessionAs()
+{
+    if( !currentEditorView() )
+    {
+        return;
+    }
+
+    QString newPath = QFileDialog::getSaveFileName( this, tr( "Save" ), currentDirectory(), "Texmaker session (*.tks);;All files (*.*)" );
+    if ( !newPath.isEmpty() )
+    {
+	if( !newPath.contains( '.' ) ) // FIXME: we should rather check whether the path ends with `.tks`
+        {
+            newPath += ".tks";
+        }
+
+        /* We only open the file for checking here, whether it's writable...
+         */
+        QFile newFile( newPath );
+        if( !newFile.open( QIODevice::WriteOnly ) ) 
+        {
+            QMessageBox::warning( this, tr( "Error" ), tr( "The file could not be saved. Please check if you have write permission." ) );
+            return;
+        }
+        else
+        {
+            /* ... and that's why we close it here right after.
+             */
+            newFile.close();
+
+            saveSession();
+            copyFile( sessionFilePath, newPath );
+            sessionFilePath = newPath;
+        }
     }
 }
 
-void Texmaker::SaveLastSession()
+
+/**
+ * Saves the session to the current `sessionFilePath`.
+ *
+ * Starts a new session implictly, if no documents are open.
+ */
+void Texmaker::saveSession()
 {
-if ( !currentEditorView() ) return;
-QFile fic(sessionTempFile);
-if (!fic.open(QIODevice::WriteOnly)) 
+    if( !currentEditorView() )
     {
-      return;
+        /* Start a new session, but don't save the current.
+         * We don't want to go 'round 'n 'round forever, do we?
+         */
+        startNewSession( false );
     }
-QDomDocument doc;
-QDomProcessingInstruction instr =  doc.createProcessingInstruction("xml","version=\"1.0\" encoding=\"UTF-8\"");
-doc.appendChild(instr);
-QDomElement root=doc.createElement("TexmakerSession");
-root.setAttribute("quickmode",QString::number(quickmode));
-doc.appendChild(root);
-QDomElement element;
-FilesMap::Iterator itf;
-QString docname;
-for( itf = filenames.begin(); itf != filenames.end(); ++itf )
-	{
-	docname=filenames[itf.key()];
-	if (!docname.startsWith("untitled"))
-	    {
-	    element=doc.createElement("document");
-	    element.setAttribute("file",docname);
-	    element.setAttribute("line",QString::number(itf.key()->editor().textCursor().blockNumber()));
-	    element.setAttribute("bookmark1",QString::number(itf.key()->editor().UserBookmark[0]));
-	    element.setAttribute("bookmark2",QString::number(itf.key()->editor().UserBookmark[1]));
-	    element.setAttribute("bookmark3",QString::number(itf.key()->editor().UserBookmark[2]));
-	    if ((!singlemode) && (MasterName==docname)) 		    element.setAttribute("master","true");
-	    else element.setAttribute("master","false");
-	    if (itf.key()==currentEditorView()) element.setAttribute("hasfocus","true");
-	    else element.setAttribute("hasfocus","false");
-	    root.appendChild(element);
-	    }
-	}
 
-QTextStream out (&fic);
-doc.save(out,4);
-fic.close();
+    /* Give up, if the file isn't writable.
+     */
+    QFile file( sessionFilePath );
+    if( !file.open( QIODevice::WriteOnly ) )
+    {
+        return;
+    }
 
+    QDomDocument doc;
+    QDomProcessingInstruction instr = doc.createProcessingInstruction( "xml", "version=\"1.0\" encoding=\"UTF-8\"" );
+    doc.appendChild( instr );
+
+    QDomElement root = doc.createElement( "TexmakerSession" );
+    root.setAttribute( "quickmode", QString::number( quickmode ) );
+    doc.appendChild(root);
+
+    for( FilesMap::Iterator itr = filenames.begin(); itr != filenames.end(); ++itr )
+    {
+    	const QString& docname = filenames[ itr.key() ];
+    	if( !docname.startsWith( "untitled" ) ) // TODO: move this string value to a constant
+    	{
+    	    QDomElement element = doc.createElement( "document" );
+    	    element.setAttribute( "file", docname );
+    	    element.setAttribute( "line", QString::number( itr.key()->editor().textCursor().blockNumber() ) );
+    	    element.setAttribute( "bookmark1", QString::number( itr.key()->editor().UserBookmark[0] ) );
+    	    element.setAttribute( "bookmark2", QString::number( itr.key()->editor().UserBookmark[1] ) );
+    	    element.setAttribute( "bookmark3", QString::number( itr.key()->editor().UserBookmark[2] ) );
+            element.setAttribute( "master"   , !singlemode && MasterName == docname ? XML_TRUE : XML_FALSE );
+    	    element.setAttribute( "hasfocus" , itr.key() == currentEditorView() ? XML_TRUE : XML_FALSE );
+    	    root.appendChild(element);
+    	}
+    }
+    
+    QTextStream out( &file );
+    doc.save( out, 4 );
+    file.close();
 }
 
-void Texmaker::LoadLastSession()
+
+/**
+ * Resets the session to blank and `sessionFilePath` to default.
+ *
+ * Since it's our design paradigm to keep track of the session state implicitly,
+ * the current session state is saved before the new session is started.
+ */
+void Texmaker::startNewSession( bool saveCurrent )
 {
-QFileInfo fi(sessionTempFile);
-if (!fi.exists()) return;
-QFile fic( sessionTempFile );
-if ( !fic.open( QIODevice::ReadOnly ) )
-	{
-	QMessageBox::warning( this,tr("Error"), tr("You do not have read permission to this file."));
-	return;
-	}
-QDomDocument doc;
-if (!doc.setContent(&fic)) 
-  	{
-	fic.close();
-	return;
-	}
-QDomElement root = doc.documentElement();
-if (root.tagName() != "TexmakerSession")
-	{
-	fic.close();
-	return;
-	}
-if (root.hasAttribute("quickmode")) quickmode=root.attribute("quickmode").toInt();
-QString file, ofile;
-int b1, b2, b3, l, ob1, ob2, ob3, ol;
-bool ma, oma;
-bool fo=false;
-QDomElement element = root.firstChildElement();
-if (!singlemode) ToggleMode();
-while (!element.isNull()) 
-  {
-  b1=0;
-  b2=0;
-  b3=0;
-  l=0;
-  ma=false;
-  file="";
-  if (element.hasAttribute("file"))
-      {
-      file=element.attribute("file");
-      if (element.hasAttribute("line")) l=element.attribute("line").toInt();
-      if (element.hasAttribute("bookmark1")) b1=element.attribute("bookmark1").toInt();
-      if (element.hasAttribute("bookmark2")) b2=element.attribute("bookmark2").toInt();
-      if (element.hasAttribute("bookmark3")) b3=element.attribute("bookmark3").toInt();
-      if (element.hasAttribute("master")) ma=(element.attribute("master")=="true");
-      if (element.hasAttribute("hasfocus")) fo=(element.attribute("focus")=="true");
-      if (fo)
-	{
-	ofile=file;
-	ol=l;
-	ob1=b1;
-	ob2=b2;
-	ob3=b3;
-	oma=ma;
-	}
-      else
-	{
-	fileOpenAndGoto(file,l+1,false);
-      	if (currentEditorView() && getName()==file)
-	  {
-	  currentEditorView()->editor().UserBookmark[0]=b1;
-	  currentEditorView()->editor().UserBookmark[1]=b2;
-	  currentEditorView()->editor().UserBookmark[2]=b3;
-	  currentEditorView()->update();
-	  if (singlemode && ma) ToggleMode();
-	  }
-	}
-	
-      }
-element=element.nextSiblingElement();
-  }
-fic.close();
-if (!ofile.isEmpty())
+    if( saveCurrent )
     {
-    fileOpenAndGoto(ofile,l+1,true);
-	if (currentEditorView() && getName()==ofile)
-	  {
-	  currentEditorView()->editor().UserBookmark[0]=ob1;
-	  currentEditorView()->editor().UserBookmark[1]=ob2;
-	  currentEditorView()->editor().UserBookmark[2]=ob3;
-	  currentEditorView()->update();
-	  if (singlemode && oma) ToggleMode();
-	  }
+        saveSession();
+    }
+
+    /* Gently close all documents (ask).
+     */
+    if( closeAll() )
+    {
+        sessionFilePath = defaultSessionFilePath();
+
+        /* Switch to single-mode.
+         */
+        if( !singlemode )
+        {
+            ToggleMode();
+        }
     }
 }
+
+
+/**
+ * Promots the user for another `sessionFilePath`, whose session is to be continued.
+ *
+ * Since it's our design paradigm to keep track of the session state implicitly,
+ * the current session state is saved before the other one is loaded.
+ */
+void Texmaker::loadAnotherSession()
+{
+    /* Gently close all documents (ask).
+     */
+    if( !closeAll() )
+    {
+        return;
+    }
+
+    const QString newPath = QFileDialog::getOpenFileName( this, tr("Open File"), currentDirectory(), "Texmaker session (*.tks);;All files (*.*)" );
+    if( !newPath.isEmpty() )
+    {
+        saveSession();
+        sessionFilePath = newPath;
+        if( !loadSession() )
+        {
+            /* If something goes wrong, we start a fresh session,
+             * but ensure that the file, which we attempted to load, isn't overriden.
+             */
+            startNewSession( false );
+        }
+    }
+}
+
+
+/**
+ * Defines the data, which we will fetch from each XML leaf when loading a session.
+ */
+struct LoadSession_FileData
+{
+    QString path;
+    int line;
+    std::tr1::array< int, 3 > bookmarks;
+    bool master;
+};
+
+/**
+ * Loads the session from the current `sessionFilePath`.
+ *
+ * Returns, whether the session was loaded successfully.
+ */
+bool Texmaker::loadSession()
+{
+    QFile file( sessionFilePath );
+    if( !file.open( QIODevice::ReadOnly ) )
+    {
+    	QMessageBox::warning( this, tr("Error"), tr( "You do not have read permission to the session file." ) );
+    	return false;
+    }
+
+    /* Close all documents without asking.
+     */
+    closeAll( false );
+
+    /* We will build a queue, which describes the files to be loaded.
+     * We keep the original order, with the except of the focused file:
+     * This file will be loaded last, in order to keep things simple.
+     */
+    typedef LoadSession_FileData FileData;
+    std::vector< FileData > queue;
+    FileData focused;
+
+    /* Process the XML file.
+     */
+    struct parseError {};
+    try
+    {
+        QDomDocument doc;
+        if( !doc.setContent( &file) ) 
+        {
+            throw parseError();
+        }
+    
+        QDomElement root = doc.documentElement();
+        if( root.tagName() != "TexmakerSession")
+        {
+            throw parseError();
+        }
+
+        if( root.hasAttribute( "quickmode" ) )
+        {
+            quickmode = root.attribute( "quickmode" ).toInt();
+        }
+
+        /* Return to single-mode.
+         * We will later switch (back) to master-mode, if are any "master"-marked files loaded.
+         */
+        if( !singlemode )
+        {
+            ToggleMode();
+        }
+
+        /* Now we will build the queue.
+         */
+        QDomElement element = root.firstChildElement();
+        while( !element.isNull() )
+        {
+            if( element.hasAttribute( "file" ) )
+            {
+                queue.push_back( FileData() );
+                LoadSession_FileData& current = queue.back();
+                current.path = element.attribute( "file" );
+
+                if( element.hasAttribute(      "line" ) ) current.line           =   element.attribute(      "line" ).toInt();
+                if( element.hasAttribute( "bookmark1" ) ) current.bookmarks[ 0 ] =   element.attribute( "bookmark1" ).toInt();
+                if( element.hasAttribute( "bookmark2" ) ) current.bookmarks[ 1 ] =   element.attribute( "bookmark2" ).toInt();
+                if( element.hasAttribute( "bookmark3" ) ) current.bookmarks[ 2 ] =   element.attribute( "bookmark3" ).toInt();
+                if( element.hasAttribute(    "master" ) ) current.master         = ( element.attribute(    "master" ) == XML_TRUE );
+
+                if( element.hasAttribute( "hasfocus" ) && ( element.attribute(  "hasfocus" ) == XML_TRUE ) )
+        	{
+                    focused = queue.back();
+                    queue.pop_back();
+        	}
+            }
+
+            element = element.nextSiblingElement();
+        }
+        if ( !focused.path.isEmpty() )
+        {
+            queue.push_back( focused );
+        }
+        file.close();
+    }
+    catch( const parseError& )
+    {
+    	QMessageBox::warning( this, tr( "Error" ), tr( "The session file is corrupted." ) );
+        file.close();
+        return false;
+    }
+
+    /* If no errors occured, we simply traverse the queue front to back and load the associated files.
+     */
+    for( std::vector< FileData >::const_iterator itr = queue.begin(); itr != queue.end(); ++itr )
+    {
+        fileOpenAndGoto( itr->path, itr->line + 1, false );
+        if( currentEditorView() && getName() == itr->path )
+        {
+            for( std::size_t bookmarkIdx = 0; bookmarkIdx < 3; ++bookmarkIdx )
+            {
+                currentEditorView()->editor().UserBookmark[ bookmarkIdx ] = itr->bookmarks[ bookmarkIdx ];
+            }
+            currentEditorView()->update();
+            if( singlemode && itr->master )
+            {
+                ToggleMode();
+            }
+        }
+    }
+
+    /* Roar!
+     */
+    return true;
+}
+
+
+/**
+ * Retrieves the directory, which the user was last "active" in, e.g. loaded a file from.
+ */
+const QString Texmaker::currentDirectory() const
+{
+    if( !lastDocument.isEmpty() )
+    {
+	const QFileInfo fi( lastDocument );
+	if( fi.exists() && fi.isReadable() )
+        {
+            return fi.absolutePath();
+	}
+    }
+    return QDir::homePath();
+}
+
 
 bool Texmaker::copyFile(QString origin,QString destination)
 {

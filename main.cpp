@@ -16,7 +16,7 @@
 #include <QStringList>
 
 
-int main( int argc, char ** argv )
+int main( unsigned int argc, const char** argv )
 {
 TexmakerApp app("TexMaker", argc, argv );
 
@@ -39,7 +39,7 @@ if ( app.isRunning() && !args.contains("-n"))
 app.init(args); // Initialization takes place only if there is no other instance running.
 
 QObject::connect( &app, SIGNAL( messageReceived(const QString &) ), 
-                  app.mw,   SLOT( onOtherInstanceMessage(const QString &) ) );
+                  app.mw.get(),   SLOT( onOtherInstanceMessage(const QString &) ) );
 
 return app.exec();
 }

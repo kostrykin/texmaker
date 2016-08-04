@@ -14,30 +14,48 @@
 
 
 #include <QTranslator>
+#include <memory>
 #include "texmaker.h"
 #include "singleapp/qtsingleapplication.h"
 
+
 class TexmakerApp : public QtSingleApplication
 {
+
 public:
-    TexmakerApp(const QString &id, int & argc, char ** argv );
+
+    TexmakerApp( const QString& id, unsigned int argc, const char** argv );
     ~TexmakerApp();
-    Texmaker *mw;  
+
+    /* TODO: make these private
+     */
+    std::auto_ptr< Texmaker > mw;
+    QList< QTranslator* > translatorsList;
+    QString language;
+
     void init( QStringList args );  // This function does all the initialization instead of the constructor.
     void makeTranslation(const QString &lang);
-    QList<QTranslator*> translatorsList;
     static TexmakerApp *instance();
     void ReadSettings();
     void SaveSettings();
-    QString language;
+
 private:
+
     static TexmakerApp *theAppInstance;
+
 protected:
+
     bool event(QEvent *event);
+
 #if defined(Q_OS_MAC)
+
     QString MacFile;
+
 #endif
+
 };
+
+
 inline TexmakerApp *TexmakerApp::instance()
 {
 	return theAppInstance;

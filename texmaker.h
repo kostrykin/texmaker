@@ -152,7 +152,7 @@ QPushButton *pb1, *pb2, *pb3;
 QString MasterName;
 bool logpresent;
 QStringList recentFilesList;
-QString sessionTempFile;
+QString sessionFilePath;
 
 //settings
 bool eraseSettings, replaceSettings;
@@ -215,6 +215,17 @@ QStringList translationList, scriptList;
 QActionGroup *translationGroup, *appearanceGroup;
 QTimer *autosaveTimer;
 
+    const QString currentDirectory() const;
+
+public slots:
+    
+    bool closeAll( bool prompt = true );
+    void saveSessionAs();
+    void saveSession();
+    void startNewSession( bool saveCurrent = true );
+    bool loadSession();
+    void loadAnotherSession();
+
 private slots:
 LatexEditorView *currentEditorView() const;
 void fileNew();
@@ -228,7 +239,6 @@ void fileSaveAs();
 void fileSaveACopy();
 void fileClose();
 void fileCloseRequested( int index);
-void fileCloseAll();
 void fileExit();
 void fileOpenRecent();
 void AddRecentFile(const QString &f);
@@ -491,12 +501,6 @@ void ToggleMetapost();
 void ToggleTikz();
 void ToggleAsymptote();
 void splitter2Changed();
-
-void SaveSession();
-void LoadSessionFile(const QString &fn);
-void LoadSession();
-void SaveLastSession();
-void LoadLastSession();
 
 void compareDocuments();
 
