@@ -57,11 +57,13 @@
 #include "scandialog.h"
 
 
-typedef QMap<LatexEditorView*, QString> FilesMap;
-typedef QMap<QString,QString> KeysMap;
-typedef QString Userlist[10];
-typedef QString UserCd[5];
-typedef int SymbolList[412];
+typedef QMap< LatexEditorView*, QString > FilesMap;
+typedef QMap< QString, QString > KeysMap;
+
+typedef QString Userlist[ 10 ];
+typedef QString UserCd  [  5 ];
+
+typedef int SymbolList[ 412 ];
 
 
 class Texmaker : public QMainWindow
@@ -73,147 +75,148 @@ public:
 
     Texmaker( QWidget* const parent = 0 );
     ~Texmaker();
-QString getName();
-QFont EditorFont;
-QByteArray windowstate,splitter1state,splitter2state,splitter3state,fullscreenstate;
-void mainWindowActivated();
-//virtual QMenu* createPopupMenu();
+
+    QString getName();
+    QFont EditorFont;
+    QByteArray windowstate,splitter1state,splitter2state,splitter3state,fullscreenstate;
+    void mainWindowActivated();
 
 public slots:
-void load( const QString &f );
-void setLine( const QString &line );
-void ToggleMode();
-void insertFromCommandLine(const QString &entity);
-void onOtherInstanceMessage(const QString &);  // For messages for the single instance
+
+    void load( const QString &f );
+    void setLine( const QString &line );
+    void ToggleMode();
+    void insertFromCommandLine(const QString &entity);
+    void onOtherInstanceMessage(const QString &);  // For messages for the single instance
 
 private:
-void setupMenus();
-void setupToolBars();
-void createStatusBar();
-bool FileAlreadyOpen(QString f);
-void closeEvent(QCloseEvent *e);
-int LevelItem(const QTreeWidgetItem *item);
-int LineItem(const QTreeWidgetItem *item);
-bool currentfileSaved();
-bool isCurrentModifiedOutside();
-bool copyFile(QString origin,QString destination);
-//void removeDir(QDir thedir);
-void createBuildSubdirectory(QString fn);
-QString outputName(QString finame,QString extension);
-QString outputBaseName(QString finame);
-bool gtkSession();
-void setMasterDocument(const QString &fn);
 
-int untitled_id;
+    void setupMenus();
+    void setupToolBars();
+    void createStatusBar();
+    bool FileAlreadyOpen(QString f);
+    void closeEvent(QCloseEvent *e);
+    int LevelItem(const QTreeWidgetItem *item);
+    int LineItem(const QTreeWidgetItem *item);
+    bool currentfileSaved();
+    bool isCurrentModifiedOutside();
+    bool copyFile( const QString& originPath, const QString& destinationPath );
+    void createBuildSubdirectory( const QString& texFilePath );
+    QString outputName( const QString& texFilePath, const QString& extension ) const;
+    QString outputBaseName( const QString& texFilePath ) const;
+    bool gtkSession();
+    void setMasterDocument(const QString &fn);
 
-FilesMap filenames;
-KeysMap shortcuts, actionstext;
-//gui
-QFrame *LeftPanelFrameBis, *Outputframe, *separatorline;
-
-MiniSplitter *splitter1, *splitter2, *splitter3 ;
-
-PlayerButton *toggleStructureButton, *toggleLogButton, *togglePdfButton, *toggleSourceButton; 
-bool embedinternalpdf,winmaximized;
-
-QStackedWidget *EditorView;
-QStackedWidget *StackedViewers;
-LogEditor* OutputTextEdit;
-
-QStackedWidget *LeftPanelStackedWidget;
-QListWidget *OpenedFilesListWidget;
-UserTagsListWidget *usertagsListWidget;
-XmlTagsListWidget *MpListWidget, *PsListWidget, *leftrightWidget, *tikzWidget, *asyWidget;
-SymbolListWidget *RelationListWidget, *ArrowListWidget, *MiscellaneousListWidget, *DelimitersListWidget, *GreekListWidget, *MostUsedListWidget, *FavoriteListWidget;
-QTreeWidget *StructureTreeWidget;
-QVBoxLayout *OutputLayoutV, *CentralLayoutBis,*LeftPanelLayoutBis;
-QHBoxLayout *OutputLayoutH, *LeftPanelLayout, *CentralLayout;
-QTableWidget *OutputTableWidget;
-//menu-toolbar
-QMenu *fileMenu, *recentMenu, *editMenu, *toolMenu, *sessionMenu;
-QMenu *math1Menu, *math11Menu, *math12Menu, *math13Menu, *math14Menu;
-QMenu *wizardMenu;
-QMenu *bibMenu, *bibtexMenu, *biblatexMenu;
-QMenu *user1Menu, *user11Menu, *user12Menu;
-QMenu *viewMenu;
-QMenu *optionsMenu, *translationMenu, *appearanceMenu, *settingsMenu, *scriptMenu;
-QMenu *helpMenu;
-
-QToolBar *fileToolBar, *editToolBar, *runToolBar, /* *formatToolBar ,*/ *logToolBar, *LeftPanelToolBar,*LeftPanelToolBarBis, *centralToolBar, *centralToolBarBis;
-QAction *recentFileActs[10], *ToggleAct, *StopAct, *UndoAct, *RedoAct, *SaveAct, *CutAct, *CopyAct,*PasteAct, *ToggleDocAct, *ViewStructurePanelAct, *ViewLogPanelAct, *ViewPdfPanelAct, *ViewSourcePanelAct, *FullScreenAct, *NextDocAct, *PrevDocAct, *ViewOpenedFilesPanelAct ;
-
-QAction *relationAct, *arrowAct, *miscAct, *delimAct, *greekAct, *usedAct, *favAct, *leftrightAct, *pstricksAct, *mpAct, *tikzAct, *asyAct, *userpanelAct;
-bool showPstricks, showMp, showTikz, showAsy;
-QAction *viewPstricksAct, *viewMpAct, *viewTikzAct, *viewAsyAct;
-
-QComboBox *comboCompil, *comboView, *comboFiles;
-QLabel *stat1, *stat2, *stat3, *titleLeftPanel, *posLabel;
-QPushButton *pb1, *pb2, *pb3;
-QString MasterName;
-bool logpresent;
-QStringList recentFilesList;
-QString sessionFilePath;
-
-//settings
-bool eraseSettings, replaceSettings;
-QString settingsFileName, outputsubdir, postquickbuild;
-int split1_right, split1_left, split2_top, split2_bottom, quickmode, tabwidth;
-bool singlemode, wordwrap, parenmatch, showline, showoutputview, showstructview, showpdfview, showsourceview, showfilesview, ams_packages, makeidx_package, completion, inlinespellcheck, modern_style, new_gui, builtinpdfview, singleviewerinstance, babel_package, geometry_package, graphicx_package, watchfiles, autosave, tabspaces, useoutputdir ;
-bool lmodern_package, kpfonts_package, fourier_package;
-QString document_class, typeface_size, paper_size, document_encoding, author, geometry_options, babel_default;
-QString latex_command, viewdvi_command, dvips_command, dvipdf_command, metapost_command, psize, xelatex_command, lualatex_command, htlatex_command, htlatex_options;
-QString viewps_command, ps2pdf_command, makeindex_command, bibtex_command, pdflatex_command, viewpdf_command, userquick_command, ghostscript_command, asymptote_command, latexmk_command, sweave_command, texdoc_command, quick_asy_command, lp_options;
-QString spell_dic, spell_ignored_words;
-QString lastDocument, input_encoding, lastChild, lastTemplate, lastScript;
-QString struct_level1, struct_level2, struct_level3, struct_level4, struct_level5;
-QStringList userClassList, userPaperList, userEncodingList, userOptionsList, userCompletionList, userBabelList;
-QStringList labelitem, bibitem, listbibfiles, listchildfiles;
-Userlist UserMenuName, UserMenuTag;
-UserCd UserToolName, UserToolCommand;
-QString keyToggleFocus;
-QString extra_path;
-QString beamer_theme, beamer_size, beamer_encoding, beamer_author, beamer_babel;
-qreal lastScale;
-bool clean_exit;
-
-//dialogs
-QPointer<ScanDialog> scanDialog;
-QPointer<Browser> browserWindow, diffWindow;
-QPointer<PdfViewerWidget> pdfviewerWidget;
-QPointer<PdfViewer> pdfviewerWindow;
-SourceView* sourceviewerWidget;
-//tools
-QProcess *proc;
-bool FINPROCESS, ERRPROCESS, STOPPROCESS;
-QStringList listViewerCommands;
-bool checkViewerInstance;
-//latex errors
-QStringList errorFileList, errorTypeList, errorLineList, errorMessageList, errorLogList;
-QList<int> onlyErrorList;
-int errorIndex, runIndex, viewIndex;
-QString pdfCheckerLang;
-//X11
-#if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
-QString x11style;
-QString x11fontfamily;
-int x11fontsize;
-#endif
-SymbolList symbolScore;
-usercodelist symbolMostused;
-QList<int> favoriteSymbolList;
-QStringList userTagsList;
-
-QColor colorBackground, colorLine, colorHighlight, colorStandard, colorComment, colorMath, colorCommand, colorKeyword, colorVerbatim, colorTodo, colorKeywordGraphic, colorNumberGraphic;
-
-QList<QColor> edcolors() {QList<QColor> e; e << colorBackground << colorLine << colorHighlight << colorStandard; return e;}
-QList<QColor> hicolors() {QList<QColor> h; h << colorStandard << colorComment << colorMath << colorCommand << colorKeyword << colorVerbatim << colorTodo << colorKeywordGraphic << colorNumberGraphic; return h;}
-
-QCompleter *completer;
-Hunspell * spellChecker;
-bool spelldicExist();
-QStringList translationList, scriptList;
-QActionGroup *translationGroup, *appearanceGroup;
-QTimer *autosaveTimer;
+    int untitled_id;
+    
+    FilesMap filenames;
+    KeysMap shortcuts, actionstext;
+    //gui
+    QFrame *LeftPanelFrameBis, *Outputframe, *separatorline;
+    
+    MiniSplitter *splitter1, *splitter2, *splitter3 ;
+    
+    PlayerButton *toggleStructureButton, *toggleLogButton, *togglePdfButton, *toggleSourceButton; 
+    bool embedinternalpdf,winmaximized;
+    
+    QStackedWidget *EditorView;
+    QStackedWidget *StackedViewers;
+    LogEditor* OutputTextEdit;
+    
+    QStackedWidget *LeftPanelStackedWidget;
+    QListWidget *OpenedFilesListWidget;
+    UserTagsListWidget *usertagsListWidget;
+    XmlTagsListWidget *MpListWidget, *PsListWidget, *leftrightWidget, *tikzWidget, *asyWidget;
+    SymbolListWidget *RelationListWidget, *ArrowListWidget, *MiscellaneousListWidget, *DelimitersListWidget, *GreekListWidget, *MostUsedListWidget, *FavoriteListWidget;
+    QTreeWidget *StructureTreeWidget;
+    QVBoxLayout *OutputLayoutV, *CentralLayoutBis,*LeftPanelLayoutBis;
+    QHBoxLayout *OutputLayoutH, *LeftPanelLayout, *CentralLayout;
+    QTableWidget *OutputTableWidget;
+    //menu-toolbar
+    QMenu *fileMenu, *recentMenu, *editMenu, *toolMenu, *sessionMenu;
+    QMenu *math1Menu, *math11Menu, *math12Menu, *math13Menu, *math14Menu;
+    QMenu *wizardMenu;
+    QMenu *bibMenu, *bibtexMenu, *biblatexMenu;
+    QMenu *user1Menu, *user11Menu, *user12Menu;
+    QMenu *viewMenu;
+    QMenu *optionsMenu, *translationMenu, *appearanceMenu, *settingsMenu, *scriptMenu;
+    QMenu *helpMenu;
+    
+    QToolBar *fileToolBar, *editToolBar, *runToolBar, /* *formatToolBar ,*/ *logToolBar, *LeftPanelToolBar,*LeftPanelToolBarBis, *centralToolBar, *centralToolBarBis;
+    QAction *recentFileActs[10], *ToggleAct, *StopAct, *UndoAct, *RedoAct, *SaveAct, *CutAct, *CopyAct,*PasteAct, *ToggleDocAct, *ViewStructurePanelAct, *ViewLogPanelAct, *ViewPdfPanelAct, *ViewSourcePanelAct, *FullScreenAct, *NextDocAct, *PrevDocAct, *ViewOpenedFilesPanelAct ;
+    
+    QAction *relationAct, *arrowAct, *miscAct, *delimAct, *greekAct, *usedAct, *favAct, *leftrightAct, *pstricksAct, *mpAct, *tikzAct, *asyAct, *userpanelAct;
+    bool showPstricks, showMp, showTikz, showAsy;
+    QAction *viewPstricksAct, *viewMpAct, *viewTikzAct, *viewAsyAct;
+    
+    QComboBox *comboCompil, *comboView, *comboFiles;
+    QLabel *stat1, *stat2, *stat3, *titleLeftPanel, *posLabel;
+    QPushButton *pb1, *pb2, *pb3;
+    QString MasterName;
+    bool logpresent;
+    QStringList recentFilesList;
+    QString sessionFilePath;
+    
+    //settings
+    bool eraseSettings, replaceSettings;
+    QString settingsFileName, outputsubdir, postquickbuild;
+    int split1_right, split1_left, split2_top, split2_bottom, quickmode, tabwidth;
+    bool singlemode, wordwrap, parenmatch, showline, showoutputview, showstructview, showpdfview, showsourceview, showfilesview, ams_packages, makeidx_package, completion, inlinespellcheck, modern_style, new_gui, builtinpdfview, singleviewerinstance, babel_package, geometry_package, graphicx_package, watchfiles, autosave, tabspaces, useoutputdir ;
+    bool lmodern_package, kpfonts_package, fourier_package;
+    QString document_class, typeface_size, paper_size, document_encoding, author, geometry_options, babel_default;
+    QString latex_command, viewdvi_command, dvips_command, dvipdf_command, metapost_command, psize, xelatex_command, lualatex_command, htlatex_command, htlatex_options;
+    QString viewps_command, ps2pdf_command, makeindex_command, bibtex_command, pdflatex_command, viewpdf_command, userquick_command, ghostscript_command, asymptote_command, latexmk_command, sweave_command, texdoc_command, quick_asy_command, lp_options;
+    QString spell_dic, spell_ignored_words;
+    QString lastDocument, input_encoding, lastChild, lastTemplate, lastScript;
+    QString struct_level1, struct_level2, struct_level3, struct_level4, struct_level5;
+    QStringList userClassList, userPaperList, userEncodingList, userOptionsList, userCompletionList, userBabelList;
+    QStringList labelitem, bibitem, listbibfiles, listchildfiles;
+    Userlist UserMenuName, UserMenuTag;
+    UserCd UserToolName, UserToolCommand;
+    QString keyToggleFocus;
+    QString extra_path;
+    QString beamer_theme, beamer_size, beamer_encoding, beamer_author, beamer_babel;
+    qreal lastScale;
+    bool clean_exit;
+    
+    //dialogs
+    QPointer<ScanDialog> scanDialog;
+    QPointer<Browser> browserWindow, diffWindow;
+    QPointer<PdfViewerWidget> pdfviewerWidget;
+    QPointer<PdfViewer> pdfviewerWindow;
+    SourceView* sourceviewerWidget;
+    //tools
+    QProcess *proc;
+    bool FINPROCESS, ERRPROCESS, STOPPROCESS;
+    QStringList listViewerCommands;
+    bool checkViewerInstance;
+    //latex errors
+    QStringList errorFileList, errorTypeList, errorLineList, errorMessageList, errorLogList;
+    QList<int> onlyErrorList;
+    int errorIndex, runIndex, viewIndex;
+    QString pdfCheckerLang;
+    //X11
+    #if defined(Q_OS_UNIX) && !defined(Q_OS_MAC)
+    QString x11style;
+    QString x11fontfamily;
+    int x11fontsize;
+    #endif
+    SymbolList symbolScore;
+    usercodelist symbolMostused;
+    QList<int> favoriteSymbolList;
+    QStringList userTagsList;
+    
+    QColor colorBackground, colorLine, colorHighlight, colorStandard, colorComment, colorMath, colorCommand, colorKeyword, colorVerbatim, colorTodo, colorKeywordGraphic, colorNumberGraphic;
+    
+    QList<QColor> edcolors() {QList<QColor> e; e << colorBackground << colorLine << colorHighlight << colorStandard; return e;}
+    QList<QColor> hicolors() {QList<QColor> h; h << colorStandard << colorComment << colorMath << colorCommand << colorKeyword << colorVerbatim << colorTodo << colorKeywordGraphic << colorNumberGraphic; return h;}
+    
+    QCompleter *completer;
+    Hunspell * spellChecker;
+    bool spelldicExist();
+    QStringList translationList, scriptList;
+    QActionGroup *translationGroup, *appearanceGroup;
+    QTimer *autosaveTimer;
 
     const QString currentDirectory() const;
 

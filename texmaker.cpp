@@ -10639,55 +10639,67 @@ const QString Texmaker::currentDirectory() const
 }
 
 
-bool Texmaker::copyFile(QString origin,QString destination)
+bool Texmaker::copyFile( const QString& originPath, const QString& destinationPath )
 {
-if (destination.isEmpty() || origin.isEmpty()) return false;
-QFileInfo fi_or(origin);
-if (!fi_or.exists()) return false;
-QFile file_or(origin);
-QFileInfo fi_dest(destination);
-if (fi_dest.exists())
-	{
-	QFile file_dest(destination);
-	file_dest.remove();
-	file_or.copy(destination);
-	}
-else
-	{
-	file_or.copy(destination);
-	}
-return true;
+    if( destinationPath.isEmpty() || originPath.isEmpty() )
+    {
+        return false;
+    }
+    const QFileInfo origin( originPath );
+    if( !origin.exists() )
+    {
+        return false;
+    }
+    const QFileInfo destination( destinationPath );
+    QFile originFile( originPath );
+    if( destination.exists() )
+    {
+        QFile destinationFile( destinationPath );
+        destinationFile.remove();
+        originFile.copy( destinationPath );
+    }
+    originFile.copy( destinationPath );
+    return true;
 }
 
 
-void Texmaker::createBuildSubdirectory(QString fn)
+void Texmaker::createBuildSubdirectory( const QString& texFilePath )
 {
-if (fn.isEmpty() || fn.startsWith("untitled")) return;
-QFileInfo fi(fn);
-if (!fi.exists()) return;
-QDir basedir(fi.absolutePath());
-QDir outputdir(fi.absolutePath()+"/"+outputsubdir);
-if (outputdir.exists()) return;
-basedir.mkdir(outputsubdir);
+    if( texFilePath.isEmpty() || texFilePath.startsWith( "untitled" ) )
+    {
+        return;
+    }
+    const QFileInfo texFileInfo( texFilePath );
+    if( !texFileInfo.exists() )
+    {
+        return;
+    }
+    const QDir basedir( texFileInfo.absolutePath() );
+    const QDir outputdir( texFileInfo.absolutePath() + "/" + outputsubdir );
+    if( !outputdir.exists() )
+    {
+        basedir.mkdir( outputsubdir );
+    }
 }
 
-QString Texmaker::outputName(QString finame,QString extension)
+
+QString Texmaker::outputName( const QString& finame, const QString& extension ) const
 {
-return outputBaseName(finame)+extension;
+    return outputBaseName( finame ) + extension;
 }
 
-QString Texmaker::outputBaseName(QString finame)
+
+QString Texmaker::outputBaseName( const QString& finame ) const
 {
-QString name="";
-QFileInfo fi(finame);
-QString path=fi.absolutePath();
-QString fn=fi.fileName();
-if (useoutputdir) name=path+"/"+outputsubdir+"/"+fn;
-else name=fi.absoluteFilePath();
-QString ext=fi.suffix();
-QString basename=name.left(name.length()-ext.length()-1);
-return basename;
+    const QFileInfo fi( finame );
+    const QString path = fi.absolutePath();
+    const QString fn = fi.fileName();
+    const QString name = useoutputdir ? path + "/" + outputsubdir + "/" + fn : fi.absoluteFilePath();
+    const QString ext = fi.suffix();
+    const QString basename = name.left( name.length() - ext.length() - 1 );
+    return basename;
 }
+
 
 bool Texmaker::gtkSession()
 {
